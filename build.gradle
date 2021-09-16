@@ -1,19 +1,30 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+group 'dev.kyro'
+version '1.0.0'
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    compile 'net.dv8tion:JDA:4.2.0_232'
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5'
+    compile group: 'org.json', name: 'json', version: '20201115'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
+    compile 'com.google.firebase:firebase-admin:8.0.0'
+    compile 'com.jagrosh:jda-utilities:3.0.5'
 }
 
-test {
-    useJUnitPlatform()
+jar {
+    manifest {
+        attributes(
+//                'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+                'Main-Class': 'dev.kyro.sauron.Sauron'
+        )
+    }
 }
