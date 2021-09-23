@@ -4,10 +4,8 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
+import java.text.DecimalFormat;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 public class HypixelPlayer {
@@ -19,6 +17,8 @@ public class HypixelPlayer {
 	public int kills;
 	public String megastreak;
 	public boolean isOnline;
+	public long lastLogout;
+	public long lastLogin;
 
 	public List<Integer> recentKills = new ArrayList<>();
 
@@ -53,7 +53,9 @@ public class HypixelPlayer {
 			megastreak = "none";
 		}
 
-		isOnline = playerObj.getLong("lastLogout") < playerObj.getLong("lastLogin");
+		lastLogout = playerObj.getLong("lastLogout");
+		lastLogin = playerObj.getLong("lastLogin");
+		isOnline = lastLogout < lastLogin;
 
 		recentKills.add(kills);
 		if(recentKills.size() > 7) recentKills.remove(0);
@@ -67,6 +69,18 @@ public class HypixelPlayer {
 
 		if(recentKills.isEmpty()) return 0;
 		return recentKills.get(recentKills.size() - 1) - recentKills.get(0);
+	}
+
+	public String getTimeOffline() {
+		if(isOnline || lastLogout == 0 || lastLogin == 0) return "";
+		long millisOffline = new Date().getTime() - Math.max(lastLogin, lastLogout);
+		double minutesOffline = millisOffline / 1000D / 60D;
+
+		DecimalFormat decimalFormat = new DecimalFormat("0.0");
+
+		if(minutesOffline < 60) return "`" + decimalFormat.format(minutesOffline) + " minutes`";
+		if(minutesOffline < 24 * 60) return "`" + decimalFormat.format(minutesOffline / 60D) + " hours`";
+		return "`" + decimalFormat.format(minutesOffline / 60D / 24D) + " days`";
 	}
 
 	private UUID getUUID(String unformattedUUID) {

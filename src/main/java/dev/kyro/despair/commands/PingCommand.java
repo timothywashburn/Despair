@@ -1,5 +1,6 @@
 package dev.kyro.despair.commands;
 
+import dev.kyro.despair.controllers.Config;
 import dev.kyro.despair.controllers.DiscordCommand;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 

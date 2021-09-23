@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'dev.kyro'
-version '1.0.0'
+version ''
 
 repositories {
     mavenCentral()
@@ -24,7 +24,7 @@ jar {
     manifest {
         attributes(
 //                'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
-                'Main-Class': 'dev.kyro.sauron.Sauron'
+                'Main-Class': 'dev.kyro.despair.Despair'
         )
     }
 }

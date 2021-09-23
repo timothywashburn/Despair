@@ -2,6 +2,7 @@ package dev.kyro.despair.controllers;
 
 import com.google.cloud.firestore.annotation.Exclude;
 import dev.kyro.despair.Despair;
+import dev.kyro.despair.misc.Variables;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +64,7 @@ public class KOS {
             }).start();
         }
         if(!saveQueued && !onSaveCooldown){
-            Despair.FIRESTORE.collection("despair").document("kos").set(this);
+            Despair.FIRESTORE.collection(Variables.COLLECTION).document("kos").set(this);
             onSaveCooldown = true;
             new Thread(() -> {
                 try {

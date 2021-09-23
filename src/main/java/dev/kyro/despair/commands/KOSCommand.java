@@ -1,13 +1,17 @@
 package dev.kyro.despair.commands;
 
-import dev.kyro.despair.Despair;
 import dev.kyro.despair.controllers.*;
+import dev.kyro.despair.exceptions.InvalidAPIKeyException;
+import dev.kyro.despair.exceptions.LookedUpNameRecentlyException;
+import dev.kyro.despair.exceptions.NoAPIKeyException;
 import dev.kyro.despair.misc.Misc;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.json.JSONObject;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class KOSCommand extends DiscordCommand {
@@ -18,30 +22,60 @@ public class KOSCommand extends DiscordCommand {
 	@Override
 	public void execute(MessageReceivedEvent event, List<String> args) {
 
+		boolean isAdmin = Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR) || event.getMember().isOwner();
+		for(Role role : event.getMember().getRoles()) {
+			if(role.getIdLong() != Config.INSTANCE.MEMBER_ROLE_ID) continue;
+			isAdmin = true;
+			break;
+		}
+		if(!isAdmin) {
+			event.getChannel().sendMessage("You need to have member access to do this").queue();
+			return;
+		}
+
 		if(args.isEmpty()) {
 
 			event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "kos <add/remove/list>`").queue();
 			return;
 		}
 
-		String subcommand = args.get(0).toLowerCase();
-		if(subcommand.equals("add")) {
+		String subCommand = args.get(0).toLowerCase();
+		if(subCommand.equals("add")) {
 			if(args.size() < 2) {
 				event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "kos add <uuid/name>`").queue();
 				return;
 			}
 			String playerIdentifier = args.get(1);
-			JSONObject requestData; HypixelPlayer tempHypixelPlayer;
-			if(Misc.isUUID(playerIdentifier)) {
-				requestData = HypixelAPIManager.request(UUID.fromString(playerIdentifier));
-			} else {
-				requestData = HypixelAPIManager.request(playerIdentifier);
+			JSONObject requestData; HypixelPlayer hypixelPlayer;
+			try {
+				if(Misc.isUUID(playerIdentifier)) {
+					requestData = HypixelAPIManager.request(UUID.fromString(playerIdentifier));
+				} else {
+					requestData = HypixelAPIManager.request(playerIdentifier);
+				}
+			} catch(Exception exception) {
+				if(exception instanceof NoAPIKeyException) {
+					event.getChannel().sendMessage("No api key set").queue();
+				} else if(exception instanceof InvalidAPIKeyException) {
+					event.getChannel().sendMessage("Invalid api key").queue();
+				} else if(exception instanceof LookedUpNameRecentlyException) {
+					event.getChannel().sendMessage("That name was already looked up recently. Use the player's uuid instead or wait a minute").queue();
+				}
+				return;
 			}
-			tempHypixelPlayer = new HypixelPlayer(requestData);
-			KOS.INSTANCE.addPlayer(new KOS.KOSPlayer(tempHypixelPlayer.name, tempHypixelPlayer.UUID.toString()), true);
-			event.getChannel().sendMessage("Added player: " + tempHypixelPlayer.name).queue();
+			hypixelPlayer = new HypixelPlayer(requestData);
 
-		} else if(subcommand.equals("remove") || subcommand.equals("delete")) {
+			if(KOS.INSTANCE.containsPlayer(hypixelPlayer.UUID)) {
+				event.getChannel().sendMessage(hypixelPlayer.name + " is already on the kos").queue();
+				return;
+			}
+
+			KOS.KOSPlayer kosPlayer = new KOS.KOSPlayer(hypixelPlayer.name, hypixelPlayer.UUID.toString());
+			kosPlayer.hypixelPlayer = hypixelPlayer;
+			KOS.INSTANCE.addPlayer(kosPlayer, true);
+			event.getChannel().sendMessage("Added player: " + hypixelPlayer.name).queue();
+
+		} else if(subCommand.equals("remove") || subCommand.equals("delete")) {
 			if(args.size() < 2) {
 				event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "kos remove <uuid/name>`").queue();
 				return;
@@ -65,7 +99,7 @@ public class KOSCommand extends DiscordCommand {
 			KOS.INSTANCE.removePlayer(removePlayer, true);
 			event.getChannel().sendMessage("Removed player: " + removePlayer.name).queue();
 
-		} else if(subcommand.equals("list")) {
+		} else if(subCommand.equals("list")) {
 			String message = "KOS PLAYERS";
 			for(KOS.KOSPlayer kosPlayer : KOS.INSTANCE.kosList) {
 				message += "\n> " + (kosPlayer.name != null ? kosPlayer.name : kosPlayer.uuid);

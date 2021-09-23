@@ -2,6 +2,7 @@ package dev.kyro.despair.controllers;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import dev.kyro.despair.Despair;
+import dev.kyro.despair.misc.Variables;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -28,17 +29,22 @@ public class DiscordManager extends Thread implements EventListener {
 	@Override
 	public void run() {
 
-		BUILDER = JDABuilder.createDefault("ODg3ODY5Nzc3NDIxNDAyMTQz.YUKbKg.yCYT56f-oFWUpj4NAYlx64ZdzBc");
+		BUILDER = JDABuilder.createDefault(Variables.TOKEN);
+		WAITER = new EventWaiter();
 		try {
 			BUILDER.setMemberCachePolicy(MemberCachePolicy.ALL);
 			BUILDER.enableIntents(GatewayIntent.GUILD_MEMBERS);
 			BUILDER.addEventListeners(this);
+			BUILDER.addEventListeners(WAITER);
 			JDA = BUILDER.build();
 			JDA.awaitReady();
 		} catch(LoginException | InterruptedException e) {
 			e.printStackTrace();
 		}
 		System.out.println("Discord bot enabled...");
+
+		new PlayerTracker().start();
+		new KOSDisplay().start();
 	}
 
 	public static void registerCommand(DiscordCommand command) {

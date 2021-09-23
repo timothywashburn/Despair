@@ -1,15 +1,16 @@
 package dev.kyro.despair;
 
 import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
 import dev.kyro.despair.commands.KOSCommand;
 import dev.kyro.despair.commands.PingCommand;
-import dev.kyro.despair.commands.SettingsCommand;
+import dev.kyro.despair.commands.ConfigCommand;
+import dev.kyro.despair.commands.SetupCommand;
 import dev.kyro.despair.controllers.*;
+import dev.kyro.despair.misc.Variables;
 import dev.kyro.despair.misc.FileResourcesUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -28,9 +29,6 @@ public class Despair {
 		BasicConfigurator.configure();
 		Logger.getRootLogger().setLevel(Level.INFO);
 
-		APIKeys.init();
-		APIKeys.updateAPIKeys();
-
 		try {
 			InputStream serviceAccount = new FileResourcesUtils().getFileFromResourceAsStream("google-key.json");
 			GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
@@ -46,27 +44,34 @@ public class Despair {
 			System.exit(1);
 		}
 
-//		KOS = new KOS();
-//		KOS.save();
-//		CONFIG = new Config();
-//		CONFIG.save();
 		try {
-			KOS = FIRESTORE.collection("despair").document("kos").get().get().toObject(KOS.class);
-			CONFIG = FIRESTORE.collection("despair").document("config").get().get().toObject(Config.class);
+			if(!FIRESTORE.collection(Variables.COLLECTION).document("kos").get().get().exists()) {
+				KOS = new KOS();
+				KOS.save();
+			}
+			if(!FIRESTORE.collection(Variables.COLLECTION).document("config").get().get().exists()) {
+				CONFIG = new Config();
+				CONFIG.save();
+			}
+
+			KOS = FIRESTORE.collection(Variables.COLLECTION).document("kos").get().get().toObject(KOS.class);
+			CONFIG = FIRESTORE.collection(Variables.COLLECTION).document("config").get().get().toObject(Config.class);
 		} catch(InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
 
+		APIKeys.init();
+		APIKeys.updateAPIKeys();
+
 		new DiscordManager().start();
 		registerCommands();
-
-		new PlayerTracker().start();
 	}
 
 	public static void registerCommands() {
 
 		DiscordManager.registerCommand(new PingCommand());
 		DiscordManager.registerCommand(new KOSCommand());
-		DiscordManager.registerCommand(new SettingsCommand());
+		DiscordManager.registerCommand(new ConfigCommand());
+		DiscordManager.registerCommand(new SetupCommand());
 	}
 }
