@@ -8,6 +8,7 @@ import dev.kyro.despair.misc.Misc;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.apache.http.auth.AuthenticationException;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -41,6 +42,10 @@ public class KOSCommand extends DiscordCommand {
 
 		String subCommand = args.get(0).toLowerCase();
 		if(subCommand.equals("add")) {
+			if(Config.INSTANCE.KEY_PROXY_LIST.size() >= PlayerTracker.getMaxPlayers()) {
+				event.getChannel().sendMessage("Max amount of players reached").queue();
+				return;
+			}
 			if(args.size() < 2) {
 				event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "kos add <uuid/name>`").queue();
 				return;
@@ -60,7 +65,13 @@ public class KOSCommand extends DiscordCommand {
 					event.getChannel().sendMessage("Invalid api key").queue();
 				} else if(exception instanceof LookedUpNameRecentlyException) {
 					event.getChannel().sendMessage("That name was already looked up recently. Use the player's uuid instead or wait a minute").queue();
+				} else if(exception instanceof AuthenticationException) {
+					event.getChannel().sendMessage("Invalid proxy").queue();
 				}
+				return;
+			}
+			if(requestData == null) {
+				event.getChannel().sendMessage("Something went wrong").queue();
 				return;
 			}
 			hypixelPlayer = new HypixelPlayer(requestData);
@@ -100,7 +111,7 @@ public class KOSCommand extends DiscordCommand {
 			event.getChannel().sendMessage("Removed player: " + removePlayer.name).queue();
 
 		} else if(subCommand.equals("list")) {
-			String message = "KOS PLAYERS";
+			String message = "KOS PLAYERS (" + KOS.INSTANCE.kosList.size() + "/" + PlayerTracker.getMaxPlayers() + ")";
 			for(KOS.KOSPlayer kosPlayer : KOS.INSTANCE.kosList) {
 				message += "\n> " + (kosPlayer.name != null ? kosPlayer.name : kosPlayer.uuid);
 			}

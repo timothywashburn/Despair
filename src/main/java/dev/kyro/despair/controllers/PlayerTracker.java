@@ -1,15 +1,13 @@
 package dev.kyro.despair.controllers;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.type.Decimal;
 import dev.kyro.despair.Despair;
 import dev.kyro.despair.exceptions.InvalidAPIKeyException;
 import dev.kyro.despair.exceptions.NoAPIKeyException;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
+import org.apache.http.auth.AuthenticationException;
 import org.json.JSONObject;
 
-import java.sql.Array;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,6 +29,7 @@ public class PlayerTracker extends Thread {
 
 			if(playerIteration.isEmpty() || count == playerIteration.size()) {
 				int playersExtra = getMaxPlayers() - count;
+				if(playersExtra < 0) playersExtra = 0;
 				count = 0;
 				playerIteration.clear();
 				playerIteration.addAll(Despair.KOS.kosList);
@@ -41,7 +40,7 @@ public class PlayerTracker extends Thread {
 //					System.out.println("Finished iteration in " + format.format((now.getTime() - lastIteration) / 1000D) + "s");
 					lastIteration = now.getTime();
 				}
-				sleepThread(playersExtra * 500L);
+				sleepThread(playersExtra * (APIKeys.getAPIKey() == null ? 500L / Config.INSTANCE.KEY_PROXY_LIST.size() : 500));
 			}
 
 			KOS.KOSPlayer kosPlayer = playerIteration.get(count);
@@ -56,6 +55,8 @@ public class PlayerTracker extends Thread {
 						System.out.println("no api key set");
 					} else if(exception instanceof InvalidAPIKeyException) {
 						System.out.println("Invalid api key");
+					} else if(exception instanceof AuthenticationException) {
+						System.out.println("Invalid proxy");
 					}
 					return;
 				}
@@ -85,12 +86,12 @@ public class PlayerTracker extends Thread {
 		}
 	}
 
-	public int getMaxPlayers() {
-		return 20 * 1;
+	public static int getMaxPlayers() {
+		return APIKeys.getAPIKey() == null ? 20 * Config.INSTANCE.KEY_PROXY_LIST.size() : 20;
 	}
 
 	public void sleepThread() {
-		int dir = 500 / 1;
+		int dir = APIKeys.getAPIKey() == null ? 500 / Config.INSTANCE.KEY_PROXY_LIST.size() : 500;
 		try {
 			Thread.sleep(dir);
 		} catch(InterruptedException e) {

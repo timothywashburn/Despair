@@ -5,6 +5,9 @@ import dev.kyro.despair.Despair;
 import dev.kyro.despair.enums.Configurable;
 import dev.kyro.despair.misc.Variables;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Config {
 	@Exclude public static Config INSTANCE;
 	@Exclude public boolean onSaveCooldown = false;
@@ -19,11 +22,13 @@ public class Config {
 	public long MEMBER_ROLE_ID;
 	public long ADMIN_ROLE_ID;
 
+	public List<KeyAndProxy> KEY_PROXY_LIST = new ArrayList<>();
+
 	public Config() {
 		INSTANCE = this;
 	}
 
-	public Config(String PREFIX, String API_KEY, long GUILD_ID, long DISPLAY_CHANNEL_ID, long DISPLAY_MESSAGE_ID, long NOTIFY_CHANNEL_ID, long MEMBER_ROLE_ID, long ADMIN_ROLE_ID) {
+	public Config(String PREFIX, String API_KEY, long GUILD_ID, long DISPLAY_CHANNEL_ID, long DISPLAY_MESSAGE_ID, long NOTIFY_CHANNEL_ID, long MEMBER_ROLE_ID, long ADMIN_ROLE_ID, List<KeyAndProxy> KEY_PROXY_LIST) {
 		this.PREFIX = PREFIX;
 		this.API_KEY = API_KEY;
 		this.GUILD_ID = GUILD_ID;
@@ -32,6 +37,7 @@ public class Config {
 		this.NOTIFY_CHANNEL_ID = NOTIFY_CHANNEL_ID;
 		this.MEMBER_ROLE_ID = MEMBER_ROLE_ID;
 		this.ADMIN_ROLE_ID = ADMIN_ROLE_ID;
+		this.KEY_PROXY_LIST = KEY_PROXY_LIST;
 	}
 
 	@Exclude
@@ -113,6 +119,25 @@ public class Config {
 				}
 				onSaveCooldown = false;
 			}).start();
+		}
+	}
+
+	public static class KeyAndProxy {
+		public String key;
+		public String proxyIp;
+		public int proxyPort;
+		public String proxyUsername;
+		public String proxyPassword;
+
+		public KeyAndProxy() {
+		}
+
+		public KeyAndProxy(String key, String proxyIp, int proxyPort, String proxyUsername, String proxyPassword) {
+			this.key = key;
+			this.proxyIp = proxyIp;
+			this.proxyPort = proxyPort;
+			this.proxyUsername = proxyUsername;
+			this.proxyPassword = proxyPassword;
 		}
 	}
 }
