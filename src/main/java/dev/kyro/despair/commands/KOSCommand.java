@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.http.auth.AuthenticationException;
+import org.apache.http.conn.HttpHostConnectException;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -67,6 +68,8 @@ public class KOSCommand extends DiscordCommand {
 					event.getChannel().sendMessage("That name was already looked up recently. Use the player's uuid instead or wait a minute").queue();
 				} else if(exception instanceof AuthenticationException) {
 					event.getChannel().sendMessage("Invalid proxy").queue();
+				} else if(exception instanceof HttpHostConnectException) {
+					event.getChannel().sendMessage("Could not connect to server (could be a proxy error)").queue();
 				}
 				return;
 			}

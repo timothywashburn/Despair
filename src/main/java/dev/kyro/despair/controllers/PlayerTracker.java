@@ -6,6 +6,7 @@ import dev.kyro.despair.exceptions.NoAPIKeyException;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.apache.http.auth.AuthenticationException;
+import org.apache.http.conn.HttpHostConnectException;
 import org.json.JSONObject;
 
 import java.text.DecimalFormat;
@@ -57,6 +58,8 @@ public class PlayerTracker extends Thread {
 						System.out.println("Invalid api key");
 					} else if(exception instanceof AuthenticationException) {
 						System.out.println("Invalid proxy");
+					} else if(exception instanceof HttpHostConnectException) {
+						System.out.println("Connection exception");
 					}
 					return;
 				}
@@ -91,7 +94,7 @@ public class PlayerTracker extends Thread {
 	}
 
 	public void sleepThread() {
-		int dir = APIKeys.getAPIKey() == null ? 500 / Config.INSTANCE.KEY_PROXY_LIST.size() : 500;
+		int dir = APIKeys.getAPIKey() == null ? 500 / (Config.INSTANCE.KEY_PROXY_LIST.size() == 0 ? 1 : Config.INSTANCE.KEY_PROXY_LIST.size()) : 500;
 		try {
 			Thread.sleep(dir);
 		} catch(InterruptedException e) {

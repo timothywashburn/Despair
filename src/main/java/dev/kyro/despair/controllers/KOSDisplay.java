@@ -25,9 +25,14 @@ public class KOSDisplay extends Thread {
 			}
 
 			if(KOS.INSTANCE.kosList.isEmpty()) {
-				displayChannel.retrieveMessageById(Config.INSTANCE.DISPLAY_MESSAGE_ID).queue((message) -> {
-					message.editMessage("No players on KOS").queue();
-				}, failure -> {});
+				try {
+					displayChannel.retrieveMessageById(Config.INSTANCE.DISPLAY_MESSAGE_ID).queue((message) -> {
+						message.editMessage("No players on KOS").queue();
+					}, failure -> {});
+				} catch(Exception exception) {
+					System.out.println("discord timeout");
+					exception.printStackTrace();
+				}
 				sleepThread();
 				continue;
 			}
@@ -67,9 +72,14 @@ public class KOSDisplay extends Thread {
 			display += "\n\n" + dateFormat.format(new Date().getTime() + 3 * 60 * 60 * 1000) + " EST";
 
 			String finalDisplay = display;
-			displayChannel.retrieveMessageById(Config.INSTANCE.DISPLAY_MESSAGE_ID).queue((message) -> {
-				message.editMessage(finalDisplay).queue();
-			}, failure -> {});
+			try {
+				displayChannel.retrieveMessageById(Config.INSTANCE.DISPLAY_MESSAGE_ID).queue((message) -> {
+					message.editMessage(finalDisplay).queue();
+				}, failure -> {});
+			} catch(Exception exception) {
+				System.out.println("discord timeout");
+				exception.printStackTrace();
+			}
 
 			sleepThread();
 		}
