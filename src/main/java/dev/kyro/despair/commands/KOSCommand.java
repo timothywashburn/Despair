@@ -41,6 +41,10 @@ public class KOSCommand extends DiscordCommand {
 
 		String subCommand = args.get(0).toLowerCase();
 		if(subCommand.equals("add")) {
+			if(KOS.INSTANCE.kosList.size() >= PlayerTracker.getMaxPlayers()) {
+				event.getChannel().sendMessage("Max amount of players reached").queue();
+				return;
+			}
 			if(args.size() < 2) {
 				event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "kos add <uuid/name>`").queue();
 				return;

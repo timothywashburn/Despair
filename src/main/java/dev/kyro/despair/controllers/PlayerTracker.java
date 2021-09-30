@@ -1,7 +1,5 @@
 package dev.kyro.despair.controllers;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.type.Decimal;
 import dev.kyro.despair.Despair;
 import dev.kyro.despair.exceptions.InvalidAPIKeyException;
 import dev.kyro.despair.exceptions.NoAPIKeyException;
@@ -9,7 +7,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.json.JSONObject;
 
-import java.sql.Array;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -85,7 +82,7 @@ public class PlayerTracker extends Thread {
 		}
 	}
 
-	public int getMaxPlayers() {
+	public static int getMaxPlayers() {
 		return 20 * 1;
 	}
 
