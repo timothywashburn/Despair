@@ -104,7 +104,7 @@ public class KOSCommand extends DiscordCommand {
 			event.getChannel().sendMessage("Removed player: " + removePlayer.name).queue();
 
 		} else if(subCommand.equals("list")) {
-			String message = "KOS PLAYERS";
+			String message = "KOS PLAYERS (" + KOS.INSTANCE.kosList.size() + "/" + PlayerTracker.getMaxPlayers() + ")";
 			for(KOS.KOSPlayer kosPlayer : KOS.INSTANCE.kosList) {
 				message += "\n> " + (kosPlayer.name != null ? kosPlayer.name : kosPlayer.uuid);
 			}
