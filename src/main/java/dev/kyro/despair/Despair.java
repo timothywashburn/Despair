@@ -5,10 +5,7 @@ import com.google.cloud.firestore.Firestore;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
-import dev.kyro.despair.commands.KOSCommand;
-import dev.kyro.despair.commands.PingCommand;
-import dev.kyro.despair.commands.ConfigCommand;
-import dev.kyro.despair.commands.SetupCommand;
+import dev.kyro.despair.commands.*;
 import dev.kyro.despair.controllers.*;
 import dev.kyro.despair.misc.Variables;
 import dev.kyro.despair.misc.FileResourcesUtils;
@@ -73,5 +70,6 @@ public class Despair {
 		DiscordManager.registerCommand(new KOSCommand());
 		DiscordManager.registerCommand(new ConfigCommand());
 		DiscordManager.registerCommand(new SetupCommand());
+		DiscordManager.registerCommand(new HelpCommand());
 	}
 }
