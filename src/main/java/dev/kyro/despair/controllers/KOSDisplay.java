@@ -28,6 +28,13 @@ public class KOSDisplay extends Thread {
 			String online = "\n\nONLINE";
 			String offline = "\n\nOFFLINE";
 
+			int onlinePlayerCount = 0; int offlinePlayerCount = 0;
+			for(KOS.KOSPlayer player : KOS.INSTANCE.kosList) {
+				if(player.hypixelPlayer.isOnline) onlinePlayerCount++; else offlinePlayerCount++;
+			}
+			online += " (" + onlinePlayerCount + "/" + KOS.INSTANCE.kosList.size() + ")";
+			offline += " (" + offlinePlayerCount + "/" + KOS.INSTANCE.kosList.size() + ")";
+
 			for(KOS.KOSPlayer player : KOS.INSTANCE.kosList) {
 				if(player.hypixelPlayer.lastLogin == 0) continue;
 				if(player.hypixelPlayer.isOnline) {
