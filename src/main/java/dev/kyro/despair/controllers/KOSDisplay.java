@@ -1,12 +1,10 @@
 package dev.kyro.despair.controllers;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class KOSDisplay extends Thread {
 
@@ -42,8 +40,20 @@ public class KOSDisplay extends Thread {
 					}
 					recentKills = recentKills.trim();
 					online += "\n> `" + player.name + "` - `" + player.hypixelPlayer.megastreak + "` [" + player.hypixelPlayer.getRecentKills() + "] ||[" + recentKills + "]||";
+				} else if(player.hypixelPlayer.isOnlineWithApiDisabled()) {
+					String recentKills = "";
+					if(player.hypixelPlayer.recentKills.size() < 2) {
+						recentKills += 0;
+					} else {
+						for(int j = 1; j < player.hypixelPlayer.recentKills.size(); j++)
+							recentKills += player.hypixelPlayer.recentKills.get(j) - player.hypixelPlayer.recentKills.get(j - 1) + " ";
+					}
+					recentKills = recentKills.trim();
+					online += "\n> *`" + player.name + "` - `" + player.hypixelPlayer.megastreak + "` [" + player.hypixelPlayer.getRecentKills() + "] ||[" + recentKills + "]||";
 				} else {
-					offline += "\n> `" + player.name + "` - " + player.hypixelPlayer.getTimeOffline();
+					offline += "\n> ";
+					if(player.hypixelPlayer.apiDisabled) offline += "*";
+					offline += "`" + player.name + "` - " + player.hypixelPlayer.getTimeOffline();
 				}
 			}
 

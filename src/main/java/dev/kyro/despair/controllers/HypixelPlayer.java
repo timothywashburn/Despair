@@ -2,11 +2,11 @@ package dev.kyro.despair.controllers;
 
 import org.json.JSONObject;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.*;
-import java.util.zip.GZIPInputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 public class HypixelPlayer {
 	private JSONObject playerObj;
@@ -17,10 +17,12 @@ public class HypixelPlayer {
 	public int kills;
 	public String megastreak;
 	public boolean isOnline;
+	public boolean apiDisabled;
 	public long lastLogout;
 	public long lastLogin;
 
 	public List<Integer> recentKills = new ArrayList<>();
+	public List<Integer> apiDisabledKillTracker = new ArrayList<>();
 
 	public HypixelPlayer(UUID UUID) {
 
@@ -53,12 +55,15 @@ public class HypixelPlayer {
 			megastreak = "none";
 		}
 
-		lastLogout = playerObj.getLong("lastLogout");
-		lastLogin = playerObj.getLong("lastLogin");
+		lastLogout = playerObj.has("lastLogout") ? playerObj.getLong("lastLogout") : -100;
+		lastLogin = playerObj.has("lastLogin") ? playerObj.getLong("lastLogin") : -100;
 		isOnline = lastLogout < lastLogin;
+		apiDisabled = lastLogout == -100 || lastLogin == -100;
 
 		recentKills.add(kills);
 		if(recentKills.size() > 7) recentKills.remove(0);
+		apiDisabledKillTracker.add(kills);
+		if(apiDisabledKillTracker.size() > 37) apiDisabledKillTracker.remove(0);
 	}
 
 	public JSONObject getPlayerObj() {
@@ -71,7 +76,14 @@ public class HypixelPlayer {
 		return recentKills.get(recentKills.size() - 1) - recentKills.get(0);
 	}
 
+	public boolean isOnlineWithApiDisabled() {
+
+		return apiDisabled && (apiDisabledKillTracker.get(apiDisabledKillTracker.size() - 1) - apiDisabledKillTracker.get(0) != 0);
+	}
+
 	public String getTimeOffline() {
+		if(apiDisabled) return "API Disabled";
+
 		if(isOnline || lastLogout == 0 || lastLogin == 0) return "";
 		long millisOffline = new Date().getTime() - Math.max(lastLogin, lastLogout);
 		double minutesOffline = millisOffline / 1000D / 60D;
