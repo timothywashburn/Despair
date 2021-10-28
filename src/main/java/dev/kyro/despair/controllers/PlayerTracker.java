@@ -65,7 +65,12 @@ public class PlayerTracker extends Thread {
 				}
 
 				boolean wasOnline = hypixelPlayer.isOnline;
+				boolean wasStreaking = hypixelPlayer.getRecentKills() != 0;
 				hypixelPlayer.update(requestData);
+				if(!hypixelPlayer.name.equals(kosPlayer.name)) {
+					kosPlayer.name = hypixelPlayer.name;
+					KOS.INSTANCE.save();
+				}
 
 				Guild guild = DiscordManager.JDA.getGuildById(Config.INSTANCE.GUILD_ID);
 				if(guild != null) {
@@ -73,6 +78,15 @@ public class PlayerTracker extends Thread {
 					if(notifyChannel != null) {
 						if(!wasOnline && hypixelPlayer.isOnline) notifyChannel.sendMessage("Login: `" + hypixelPlayer.name + "`").queue();
 						if(wasOnline && !hypixelPlayer.isOnline) notifyChannel.sendMessage("Logout: `" + hypixelPlayer.name + "`").queue();
+
+						if(hypixelPlayer.recentKills.size() > 2 &&hypixelPlayer.recentKills.get(hypixelPlayer.recentKills.size() - 1) -
+								hypixelPlayer.recentKills.get(hypixelPlayer.recentKills.size() - 2) != 0) {
+							String pingString = "";
+							for(Users.DiscordUser discordUser : Users.INSTANCE.getUsersWithTags(hypixelPlayer.name, kosPlayer.tags)) {
+								pingString += " <@" + discordUser.id + ">";
+							}
+							notifyChannel.sendMessage("Streaking: `" + hypixelPlayer.name + "`" + pingString).queue();
+						}
 					}
 				}
 			}).start();

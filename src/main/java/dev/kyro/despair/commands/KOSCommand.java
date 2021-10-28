@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -46,7 +47,7 @@ public class KOSCommand extends DiscordCommand {
 				return;
 			}
 			if(args.size() < 2) {
-				event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "kos add <uuid/name>`").queue();
+				event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "kos add <uuid/name> [tag-1] [tag-2]...`").queue();
 				return;
 			}
 			String playerIdentifier = args.get(1);
@@ -74,7 +75,10 @@ public class KOSCommand extends DiscordCommand {
 				return;
 			}
 
-			KOS.KOSPlayer kosPlayer = new KOS.KOSPlayer(hypixelPlayer.name, hypixelPlayer.UUID.toString());
+			List<String> tags = new ArrayList<>();
+			for(int i = 2; i < args.size(); i++) tags.add(args.get(i));
+
+			KOS.KOSPlayer kosPlayer = new KOS.KOSPlayer(hypixelPlayer.name, hypixelPlayer.UUID.toString(), tags);
 			kosPlayer.hypixelPlayer = hypixelPlayer;
 			KOS.INSTANCE.addPlayer(kosPlayer, true);
 			event.getChannel().sendMessage("Added player: " + hypixelPlayer.name).queue();
@@ -106,7 +110,7 @@ public class KOSCommand extends DiscordCommand {
 		} else if(subCommand.equals("list")) {
 			String message = "KOS PLAYERS (" + KOS.INSTANCE.kosList.size() + "/" + PlayerTracker.getMaxPlayers() + ")";
 			for(KOS.KOSPlayer kosPlayer : KOS.INSTANCE.kosList) {
-				message += "\n> " + (kosPlayer.name != null ? kosPlayer.name : kosPlayer.uuid);
+				message += "\n> " + (kosPlayer.name != null ? kosPlayer.name : kosPlayer.uuid) + kosPlayer.getTagsAsString();
 			}
 			event.getChannel().sendMessage(message).queue();
 		} else {

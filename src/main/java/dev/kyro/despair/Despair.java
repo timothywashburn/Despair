@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutionException;
 public class Despair {
 	public static Firestore FIRESTORE;
 	public static KOS KOS;
+	public static Users USERS;
 	public static Config CONFIG;
 
 	public static void main(String[] args) {
@@ -46,12 +47,17 @@ public class Despair {
 				KOS = new KOS();
 				KOS.save();
 			}
+			if(!FIRESTORE.collection(Variables.COLLECTION).document("users").get().get().exists()) {
+				USERS = new Users();
+				USERS.save();
+			}
 			if(!FIRESTORE.collection(Variables.COLLECTION).document("config").get().get().exists()) {
 				CONFIG = new Config();
 				CONFIG.save();
 			}
 
 			KOS = FIRESTORE.collection(Variables.COLLECTION).document("kos").get().get().toObject(KOS.class);
+			USERS = FIRESTORE.collection(Variables.COLLECTION).document("users").get().get().toObject(Users.class);
 			CONFIG = FIRESTORE.collection(Variables.COLLECTION).document("config").get().get().toObject(Config.class);
 		} catch(InterruptedException | ExecutionException e) {
 			e.printStackTrace();
@@ -66,10 +72,11 @@ public class Despair {
 
 	public static void registerCommands() {
 
+		DiscordManager.registerCommand(new HelpCommand());
 		DiscordManager.registerCommand(new PingCommand());
 		DiscordManager.registerCommand(new KOSCommand());
 		DiscordManager.registerCommand(new ConfigCommand());
 		DiscordManager.registerCommand(new SetupCommand());
-		DiscordManager.registerCommand(new HelpCommand());
+		DiscordManager.registerCommand(new NotifyCommand());
 	}
 }
