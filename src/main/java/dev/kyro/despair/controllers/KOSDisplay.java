@@ -81,9 +81,9 @@ public class KOSDisplay extends Thread {
 
 	public void sleepThread() {
 		try {
-			Thread.sleep(2500);
-		} catch(InterruptedException e) {
-			e.printStackTrace();
+			Thread.sleep(10000);
+		} catch(InterruptedException exception) {
+			exception.printStackTrace();
 			System.out.println(System.currentTimeMillis());
 		}
 	}
