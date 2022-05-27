@@ -83,6 +83,9 @@ public class Users {
 
 	public static class DiscordUser {
 		public long id;
+		public long categoryID;
+		public long displayChannelID;
+		public long notifyChannelID;
 		public List<String> tags = new ArrayList<>();
 
 		public DiscordUser() { }

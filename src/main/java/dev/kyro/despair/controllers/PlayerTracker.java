@@ -97,7 +97,7 @@ public class PlayerTracker extends Thread {
 	}
 
 	public static int getMaxPlayers() {
-		return 20 * 1;
+		return 40 * 1;
 	}
 
 	public void sleepThread() {
