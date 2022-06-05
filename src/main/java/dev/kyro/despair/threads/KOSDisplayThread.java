@@ -4,10 +4,11 @@ import dev.kyro.despair.controllers.UserManager;
 import dev.kyro.despair.controllers.objects.DespairUser;
 
 public class KOSDisplayThread extends Thread {
+	public static boolean running = true;
 
 	@Override
 	public void run() {
-		while(true) {
+		while(running) {
 			for(DespairUser despairUser : UserManager.users) {
 				if(despairUser.kosChannel == null) continue;
 				despairUser.kosChannel.retrieveMessageById(despairUser.kosMessageID).queue((message) -> {

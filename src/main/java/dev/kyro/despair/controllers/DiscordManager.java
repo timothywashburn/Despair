@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class DiscordManager extends Thread implements EventListener {
-
 	public static JDABuilder BUILDER;
 	public static JDA JDA;
 	public static List<DiscordCommand> commands = new ArrayList<>();
