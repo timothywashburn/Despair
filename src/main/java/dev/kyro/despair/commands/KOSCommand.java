@@ -1,18 +1,20 @@
 package dev.kyro.despair.commands;
 
-import dev.kyro.despair.controllers.*;
+import dev.kyro.despair.controllers.HypixelAPIManager;
+import dev.kyro.despair.controllers.HypixelPlayer;
+import dev.kyro.despair.controllers.UserManager;
+import dev.kyro.despair.controllers.objects.Config;
+import dev.kyro.despair.controllers.objects.DespairUser;
+import dev.kyro.despair.controllers.objects.DiscordCommand;
+import dev.kyro.despair.controllers.objects.KOS;
 import dev.kyro.despair.exceptions.InvalidAPIKeyException;
 import dev.kyro.despair.exceptions.LookedUpNameRecentlyException;
 import dev.kyro.despair.exceptions.NoAPIKeyException;
 import dev.kyro.despair.misc.Misc;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 public class KOSCommand extends DiscordCommand {
@@ -22,41 +24,40 @@ public class KOSCommand extends DiscordCommand {
 
 	@Override
 	public void execute(MessageReceivedEvent event, List<String> args) {
-
-		boolean isAdmin = Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR) || event.getMember().isOwner();
-		for(Role role : event.getMember().getRoles()) {
-			if(role.getIdLong() != Config.INSTANCE.MEMBER_ROLE_ID) continue;
-			isAdmin = true;
-			break;
-		}
-		if(!isAdmin) {
-			event.getChannel().sendMessage("You need to have member access to do this").queue();
+		DespairUser despairUser = UserManager.getUser(event.getMember());
+		if(event.getChannel().getIdLong() != despairUser.kosChannelID) {
+			event.getChannel().sendMessage("This command can only be used in your channel (<#" + despairUser.kosChannelID + ">)").queue();
 			return;
 		}
 
 		if(args.isEmpty()) {
-
 			event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "kos <add/remove/list>`").queue();
 			return;
 		}
 
 		String subCommand = args.get(0).toLowerCase();
 		if(subCommand.equals("add")) {
-			if(KOS.INSTANCE.kosList.size() >= PlayerTracker.getMaxPlayers()) {
-				event.getChannel().sendMessage("Max amount of players reached").queue();
-				return;
-			}
 			if(args.size() < 2) {
-				event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "kos add <uuid/name> [tag-1] [tag-2]...`").queue();
+				event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "kos add <uuid/name>`").queue();
 				return;
 			}
 			String playerIdentifier = args.get(1);
-			JSONObject requestData; HypixelPlayer hypixelPlayer;
+			JSONObject requestData = null;
+			HypixelPlayer hypixelPlayer;
 			try {
 				if(Misc.isUUID(playerIdentifier)) {
 					requestData = HypixelAPIManager.request(UUID.fromString(playerIdentifier));
 				} else {
-					requestData = HypixelAPIManager.request(playerIdentifier);
+					if(KOS.INSTANCE.containsPlayer(playerIdentifier)) {
+						for(KOS.KOSPlayer player : KOS.INSTANCE.kosList) {
+							if(!player.name.equalsIgnoreCase(playerIdentifier)) return;
+							requestData = HypixelAPIManager.request(UUID.fromString(player.uuid));
+							break;
+						}
+						assert requestData != null;
+					} else {
+						requestData = HypixelAPIManager.request(playerIdentifier);
+					}
 				}
 			} catch(Exception exception) {
 				if(exception instanceof NoAPIKeyException) {
@@ -70,17 +71,19 @@ public class KOSCommand extends DiscordCommand {
 			}
 			hypixelPlayer = new HypixelPlayer(requestData);
 
-			if(KOS.INSTANCE.containsPlayer(hypixelPlayer.UUID)) {
-				event.getChannel().sendMessage(hypixelPlayer.name + " is already on the kos").queue();
+			if(despairUser.kosList.contains(hypixelPlayer.UUID.toString())) {
+				event.getChannel().sendMessage(hypixelPlayer.name + " is already on your kos").queue();
 				return;
 			}
+			despairUser.kosList.add(hypixelPlayer.UUID.toString());
+			despairUser.save(true);
 
-			List<String> tags = new ArrayList<>();
-			for(int i = 2; i < args.size(); i++) tags.add(args.get(i));
+			if(!KOS.INSTANCE.containsPlayer(hypixelPlayer.UUID)) {
+				KOS.KOSPlayer kosPlayer = new KOS.KOSPlayer(hypixelPlayer.name, hypixelPlayer.UUID.toString());
+				kosPlayer.hypixelPlayer = hypixelPlayer;
+				KOS.INSTANCE.addPlayer(kosPlayer, true);
+			}
 
-			KOS.KOSPlayer kosPlayer = new KOS.KOSPlayer(hypixelPlayer.name, hypixelPlayer.UUID.toString(), tags);
-			kosPlayer.hypixelPlayer = hypixelPlayer;
-			KOS.INSTANCE.addPlayer(kosPlayer, true);
 			event.getChannel().sendMessage("Added player: " + hypixelPlayer.name).queue();
 
 		} else if(subCommand.equals("remove") || subCommand.equals("delete")) {
@@ -91,7 +94,8 @@ public class KOSCommand extends DiscordCommand {
 			String playerIdentifier = args.get(1);
 			KOS.KOSPlayer removePlayer = null;
 			for(KOS.KOSPlayer kosPlayer : KOS.INSTANCE.kosList) {
-				if(!kosPlayer.uuid.equals(playerIdentifier) && !kosPlayer.name.equalsIgnoreCase(playerIdentifier)) continue;
+				if(!kosPlayer.uuid.equals(playerIdentifier) && !kosPlayer.name.equalsIgnoreCase(playerIdentifier))
+					continue;
 				removePlayer = kosPlayer;
 				break;
 			}
@@ -104,13 +108,31 @@ public class KOSCommand extends DiscordCommand {
 				return;
 			}
 
-			KOS.INSTANCE.removePlayer(removePlayer, true);
+			if(!despairUser.kosList.contains(removePlayer.uuid)) {
+				event.getChannel().sendMessage("That player is not on your kos").queue();
+				return;
+			}
+			despairUser.kosList.remove(removePlayer.uuid);
+			despairUser.save(true);
+
+			boolean shouldRemove = true;
+			for(DespairUser user : UserManager.users) {
+				if(!user.kosList.contains(removePlayer.uuid)) continue;
+				shouldRemove = false;
+				break;
+			}
+			if(shouldRemove) {
+				KOS.INSTANCE.kosList.remove(removePlayer);
+				KOS.INSTANCE.save();
+			}
+
 			event.getChannel().sendMessage("Removed player: " + removePlayer.name).queue();
 
 		} else if(subCommand.equals("list")) {
-			String message = "KOS PLAYERS (" + KOS.INSTANCE.kosList.size() + "/" + PlayerTracker.getMaxPlayers() + ")";
+			String message = "KOS PLAYERS (" + despairUser.kosList.size() + ")";
 			for(KOS.KOSPlayer kosPlayer : KOS.INSTANCE.kosList) {
-				message += "\n> " + (kosPlayer.name != null ? kosPlayer.name : kosPlayer.uuid) + kosPlayer.getTagsAsString();
+				if(!despairUser.kosList.contains(kosPlayer.uuid)) continue;
+				message += "\n> `" + (kosPlayer.name != null ? kosPlayer.name : kosPlayer.uuid) + "` - [" + kosPlayer.priority + "]";
 			}
 			event.getChannel().sendMessage(message).queue();
 		} else {

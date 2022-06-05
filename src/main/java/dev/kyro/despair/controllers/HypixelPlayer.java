@@ -61,9 +61,9 @@ public class HypixelPlayer {
 		apiDisabled = lastLogout == -100 || lastLogin == -100;
 
 		recentKills.add(kills);
-		if(recentKills.size() > 7) recentKills.remove(0);
+		if(recentKills.size() > Math.round(120.0 / PlayerTracker.getMaxPlayers() + 1)) recentKills.remove(0);
 		apiDisabledKillTracker.add(kills);
-		if(apiDisabledKillTracker.size() > 37) apiDisabledKillTracker.remove(0);
+		if(apiDisabledKillTracker.size() > Math.round(600.0 / PlayerTracker.getMaxPlayers() + 1)) apiDisabledKillTracker.remove(0);
 	}
 
 	public JSONObject getPlayerObj() {
@@ -93,6 +93,11 @@ public class HypixelPlayer {
 		if(minutesOffline < 60) return "`" + decimalFormat.format(minutesOffline) + " minutes`";
 		if(minutesOffline < 24 * 60) return "`" + decimalFormat.format(minutesOffline / 60D) + " hours`";
 		return "`" + decimalFormat.format(minutesOffline / 60D / 24D) + " days`";
+	}
+
+	public void clear() {
+		recentKills.clear();
+		apiDisabledKillTracker.clear();
 	}
 
 	private UUID getUUID(String unformattedUUID) {

@@ -2,12 +2,19 @@ package dev.kyro.despair.controllers;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import dev.kyro.despair.Despair;
-import dev.kyro.despair.misc.Variables;
+import dev.kyro.despair.controllers.objects.Config;
+import dev.kyro.despair.controllers.objects.DiscordCommand;
+import dev.kyro.despair.misc.Constants;
+import dev.kyro.despair.threads.DecayThread;
+import dev.kyro.despair.threads.KOSDisplayThread;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -26,10 +33,14 @@ public class DiscordManager extends Thread implements EventListener {
 	public static List<DiscordCommand> commands = new ArrayList<>();
 	public static EventWaiter WAITER;
 
+	public static Guild getGuild() {
+		return JDA.getGuildById(Config.INSTANCE.GUILD_ID);
+	}
+
 	@Override
 	public void run() {
 
-		BUILDER = JDABuilder.createDefault(Variables.TOKEN);
+		BUILDER = JDABuilder.createDefault(Constants.TOKEN);
 		WAITER = new EventWaiter();
 		try {
 			BUILDER.setMemberCachePolicy(MemberCachePolicy.ALL);
@@ -43,8 +54,10 @@ public class DiscordManager extends Thread implements EventListener {
 		}
 		System.out.println("Discord bot enabled...");
 
+		UserManager.init();
 		new PlayerTracker().start();
-		new KOSDisplay().start();
+		new KOSDisplayThread().start();
+		new DecayThread().start();
 	}
 
 	public static void registerCommand(DiscordCommand command) {
@@ -70,6 +83,13 @@ public class DiscordManager extends Thread implements EventListener {
 
 			if(!discordCommand.command.equals(command) && !discordCommand.aliases.contains(command)) continue;
 
+			boolean isAdmin = Despair.isAdmin(event.getMember());
+			if(discordCommand.adminCommand) {
+				if(!isAdmin) return;
+				discordCommand.execute(event, args);
+				return;
+			}
+
 			discordCommand.execute(event, args);
 			return;
 		}
@@ -78,10 +98,16 @@ public class DiscordManager extends Thread implements EventListener {
 	@Override
 	public void onEvent(@NotNull GenericEvent event) {
 
-		if (event instanceof ReadyEvent)
+		if(event instanceof ReadyEvent)
 			System.out.println("API is ready!");
 
 		if(event instanceof MessageReceivedEvent)
 			onMessageReceived((MessageReceivedEvent) event);
+
+		if(event instanceof GuildMemberJoinEvent)
+			UserManager.onJoin((GuildMemberJoinEvent) event);
+
+		if(event instanceof GuildMemberRemoveEvent)
+			UserManager.onLeave((GuildMemberRemoveEvent) event);
 	}
 }

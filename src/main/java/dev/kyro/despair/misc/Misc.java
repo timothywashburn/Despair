@@ -1,8 +1,19 @@
 package dev.kyro.despair.misc;
 
+import dev.kyro.despair.controllers.DiscordManager;
+import net.dv8tion.jda.api.entities.Member;
+
 import java.util.UUID;
 
 public class Misc {
+
+	public static Member getMember(String ref) {
+
+		try {
+			return DiscordManager.getGuild().getMemberById(ref);
+		} catch(Exception ignored) {}
+		return DiscordManager.getGuild().getMemberById(DisUtil.mentionToId(ref));
+	}
 
 	public static boolean isUUID(String uuid) {
 		try {
