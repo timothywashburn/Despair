@@ -105,7 +105,7 @@ public class DespairUser {
 		}
 
 		for(KOS.KOSPlayer player : kosList) {
-			if(player.hypixelPlayer.isOnline) onlinePlayerCount++;
+			if(player.hypixelPlayer.isOnline || player.hypixelPlayer.isOnlineWithApiDisabled()) onlinePlayerCount++;
 			else offlinePlayerCount++;
 		}
 		online += " (" + onlinePlayerCount + "/" + kosSize + ")";
