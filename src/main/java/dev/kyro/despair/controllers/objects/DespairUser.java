@@ -110,9 +110,14 @@ public class DespairUser {
 		}
 		online += " (" + onlinePlayerCount + "/" + kosSize + ")";
 		offline += " (" + offlinePlayerCount + "/" + kosSize + ")";
+
 		DecimalFormat decimalFormat = new DecimalFormat("0.##");
-		untracked = "\n\nUNTRACKED (" + untrackedPlayerCount + "/" + kosSize + ")" + " - Priority > " +
-				decimalFormat.format(sortedKOS.get(Math.min(sortedKOS.size() - 1, PlayerTracker.getMaxPlayers())).priority) + " needed" + untracked;
+		String tempUntracked = untracked;
+		untracked = "\n\nUNTRACKED (" + untrackedPlayerCount + "/" + kosSize + ")";
+		if(untrackedPlayerCount != 0) {
+			untracked += " - Priority > " + decimalFormat.format(sortedKOS.get(Math.min(sortedKOS.size() - 1, PlayerTracker.getMaxPlayers())).priority) + " needed";
+		}
+		untracked += tempUntracked;
 
 		for(KOS.KOSPlayer player : kosList) {
 			if(player.hypixelPlayer.lastLogin == 0) continue;
