@@ -51,6 +51,12 @@ public class HypixelPlayer {
 		kills = achievements.getInt("pit_kills");
 		try {
 			megastreak = pitData.getString("selected_killstreak_0");
+			if(megastreak.equals("overdrive")) megastreak = "Overdrive";
+			if(megastreak.equals("beastmode")) megastreak = "Beastmode";
+			if(megastreak.equals("hermit")) megastreak = "Hermit";
+			if(megastreak.equals("grand_finale")) megastreak = "Magnum Opus";
+			if(megastreak.equals("to_the_moon")) megastreak = "To The Moon";
+			if(megastreak.equals("uberstreak")) megastreak = "Uberstreak";
 		} catch(Exception ignored) {
 			megastreak = "none";
 		}
