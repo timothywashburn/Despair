@@ -59,7 +59,7 @@ public class HypixelPlayer {
 			if(megastreak.equals("to_the_moon")) megastreak = "To The Moon";
 			if(megastreak.equals("uberstreak")) megastreak = "Uberstreak";
 		} catch(Exception ignored) {
-			megastreak = "none";
+			megastreak = "No Megastreak";
 		}
 
 		lastLogout = playerObj.has("lastLogout") ? playerObj.getLong("lastLogout") : -100;
