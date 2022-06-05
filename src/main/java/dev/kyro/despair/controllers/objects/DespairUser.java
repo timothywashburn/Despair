@@ -131,6 +131,10 @@ public class DespairUser {
 		display += offline;
 		display += untracked;
 
+		if(untrackedPlayerCount != 0) {
+			display += "\n*To track an untracked player, use `" + Config.INSTANCE.PREFIX + "bump`";
+		}
+
 		String pattern = "HH:mm:ss";
 		SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
 		display += "\n\n" + dateFormat.format(new Date().getTime() + 3 * 60 * 60 * 1000) + " EST";
