@@ -20,7 +20,7 @@ public class HelpCommand extends DiscordCommand {
 		String prefix = Config.INSTANCE.PREFIX;
 		helpMessage.add("> `" + prefix + "help` - View this message");
 		helpMessage.add("> `" + prefix + "kos` - Modify the KOS list");
-		helpMessage.add("> `" + prefix + "view` - View the KOS list");
+		helpMessage.add("> `" + prefix + "view` - Displays the automatically updating view of the KOS list");
 		helpMessage.add("> `" + prefix + "notify/tags/pings` - You will be pinged for notifications of players on this list");
 		helpMessage.add("> `" + prefix + "status` - Visual check to see if the bot is responsive");
 		helpMessage.add("> `" + prefix + "bal` - Displays the number of credits you have");
