@@ -2,6 +2,7 @@ package dev.kyro.despair.commands;
 
 import dev.kyro.despair.controllers.HypixelAPIManager;
 import dev.kyro.despair.controllers.HypixelPlayer;
+import dev.kyro.despair.controllers.PlayerTracker;
 import dev.kyro.despair.controllers.UserManager;
 import dev.kyro.despair.controllers.objects.Config;
 import dev.kyro.despair.controllers.objects.DespairUser;
@@ -14,6 +15,7 @@ import dev.kyro.despair.misc.Misc;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,7 +52,7 @@ public class KOSCommand extends DiscordCommand {
 				} else {
 					if(KOS.INSTANCE.containsPlayer(playerIdentifier)) {
 						for(KOS.KOSPlayer player : KOS.INSTANCE.kosList) {
-							if(!player.name.equalsIgnoreCase(playerIdentifier)) return;
+							if(!player.name.equalsIgnoreCase(playerIdentifier)) continue;
 							requestData = HypixelAPIManager.request(UUID.fromString(player.uuid));
 							break;
 						}
@@ -129,10 +131,11 @@ public class KOSCommand extends DiscordCommand {
 			event.getChannel().sendMessage("Removed player: " + removePlayer.name).queue();
 
 		} else if(subCommand.equals("list")) {
-			String message = "KOS PLAYERS (" + despairUser.kosList.size() + ")";
-			for(KOS.KOSPlayer kosPlayer : KOS.INSTANCE.kosList) {
+			String message = "KOS PLAYERS (" + despairUser.kosList.size() + "/" + PlayerTracker.getMaxPlayers() + ")";
+			DecimalFormat decimalFormat = new DecimalFormat("0.##");
+			for(KOS.KOSPlayer kosPlayer : PlayerTracker.getSortedKOS()) {
 				if(!despairUser.kosList.contains(kosPlayer.uuid)) continue;
-				message += "\n> `" + (kosPlayer.name != null ? kosPlayer.name : kosPlayer.uuid) + "` - [" + kosPlayer.priority + "]";
+				message += "\n> `" + (kosPlayer.name != null ? kosPlayer.name : kosPlayer.uuid) + "` - [" + decimalFormat.format(kosPlayer.priority) + "]";
 			}
 			event.getChannel().sendMessage(message).queue();
 		} else {

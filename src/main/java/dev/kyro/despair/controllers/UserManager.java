@@ -43,11 +43,13 @@ public class UserManager {
 	}
 
 	public static void onJoin(GuildMemberJoinEvent event) {
+		if(event.getUser().isBot()) return;
 		Member discordMember = event.getMember();
 		UserManager.getUser(discordMember);
 	}
 
 	public static void onLeave(GuildMemberRemoveEvent event) {
+		if(event.getUser().isBot()) return;
 		User discordUser = event.getUser();
 		for(DespairUser user : UserManager.users) {
 			if(user.discordId != discordUser.getIdLong()) continue;

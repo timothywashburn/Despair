@@ -112,6 +112,7 @@ public class PlayerTracker extends Thread {
 	public static List<KOS.KOSPlayer> getSortedKOS() {
 		List<KOS.KOSPlayer> tempList = new ArrayList<>(Despair.KOS.kosList);
 		List<KOS.KOSPlayer> sortedList = new ArrayList<>();
+		first:
 		for(KOS.KOSPlayer kosPlayer : tempList) {
 			if(sortedList.isEmpty()) {
 				sortedList.add(kosPlayer);
@@ -121,7 +122,7 @@ public class PlayerTracker extends Thread {
 				KOS.KOSPlayer testPlayer = sortedList.get(i);
 				if(testPlayer.priority >= kosPlayer.priority) continue;
 				sortedList.add(i, kosPlayer);
-				break;
+				continue first;
 			}
 			sortedList.add(kosPlayer);
 		}
