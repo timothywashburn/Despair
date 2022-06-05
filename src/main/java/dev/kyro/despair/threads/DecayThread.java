@@ -10,21 +10,21 @@ public class DecayThread extends Thread {
 	@Override
 	public void run() {
 		while(true) {
-			if(count % 10 == 0) {
+			if(count % 60 == 0) {
 				for(DespairUser despairUser : UserManager.users) {
 					if(despairUser.priorityBoost + 1 > DespairUser.MAX_CREDITS) continue;
 					despairUser.priorityBoost++;
 				}
 			}
-			if(count % 30 == 0) {
+			if(count % 60 == 0) {
 				for(DespairUser despairUser : UserManager.users) despairUser.save(false);
 			}
-			if(count % 10 == 0) {
+			if(count % 60 == 0) {
 				for(KOS.KOSPlayer player : KOS.INSTANCE.kosList) {
 					player.priority = Math.max(player.priority - 0.01 * player.priority, 0);
 				}
 			}
-			if(count % 30 == 0) {
+			if(count % 60 == 0) {
 				KOS.INSTANCE.save();
 			}
 			count++;
