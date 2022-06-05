@@ -71,7 +71,12 @@ public class KOSCommand extends DiscordCommand {
 				}
 				return;
 			}
-			hypixelPlayer = new HypixelPlayer(requestData);
+			try {
+				hypixelPlayer = new HypixelPlayer(requestData);
+			} catch(Exception ignored) {
+				event.getChannel().sendMessage("That player hasn't played pit before").queue();
+				return;
+			}
 
 			if(despairUser.kosList.contains(hypixelPlayer.UUID.toString())) {
 				event.getChannel().sendMessage(hypixelPlayer.name + " is already on your kos").queue();
