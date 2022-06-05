@@ -24,8 +24,13 @@ public class HelpCommand extends DiscordCommand {
 		helpMessage.add("> `" + prefix + "ping` - Visual check to see if the bot is responsive");
 		helpMessage.add("> `" + prefix + "bal` - Displays the number of credits you have");
 		helpMessage.add("> `" + prefix + "bump` - Increase the priority of an account on the KOS list");
-		helpMessage.add("> The `*` character displayed next to a name on the KOS list signifies as an API disabled player." +
-				" Such players can only be detected by whether or not they are streaking, and their online/offline status is an assumption based off of that data");
+		helpMessage.add("> The [x] display where x is a number on the .view of the KOS " +
+				"list shows how many kills (approximately) the player has gotten in the last minute");
+		helpMessage.add("> The [x] display where x is a number on .kos list shows how many credits are assigned to a player");
+		helpMessage.add("> Credits can be given to players to boost them out of the \"UNTRACKED\" section");
+		helpMessage.add("> Notifications are displayed for login, logout, and when someone has > 0 kills in the last minute");
+		helpMessage.add("> The `*` character displayed next to a name on the KOS list signifies as an API disabled player. " +
+				"Such players can only be detected by whether or not they are streaking, and their online/offline status is an assumption based off of that data");
 
 		List<String> adminHelp = new ArrayList<>();
 		adminHelp.add("\nADMIN COMMANDS");
