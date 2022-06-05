@@ -84,7 +84,7 @@ public class HypixelPlayer {
 	}
 
 	public boolean isOnlineWithApiDisabled() {
-
+		if(apiDisabledKillTracker.isEmpty()) return false;
 		return apiDisabled && (apiDisabledKillTracker.get(apiDisabledKillTracker.size() - 1) - apiDisabledKillTracker.get(0) != 0);
 	}
 

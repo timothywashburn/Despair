@@ -13,6 +13,7 @@ public class KOS {
 	@Exclude
 	public static KOS INSTANCE;
 	public List<KOSPlayer> kosList = new ArrayList<>();
+	public List<String> blacklist = new ArrayList<>();
 	@Exclude
 	public boolean onSaveCooldown = false;
 	@Exclude
@@ -22,9 +23,10 @@ public class KOS {
 		INSTANCE = this;
 	}
 
-	public KOS(List<KOSPlayer> kos) {
+	public KOS(List<KOSPlayer> kos, List<String> blacklist) {
 		INSTANCE = this;
 		setKosList(kos);
+		this.blacklist = blacklist;
 	}
 
 	public void setKosList(List<KOSPlayer> kosList) {

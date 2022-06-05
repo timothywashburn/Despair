@@ -77,6 +77,12 @@ public class KOSCommand extends DiscordCommand {
 				event.getChannel().sendMessage(hypixelPlayer.name + " is already on your kos").queue();
 				return;
 			}
+
+			if(KOS.INSTANCE.blacklist.contains(hypixelPlayer.UUID.toString())) {
+				event.getChannel().sendMessage("That player cannot be put on the KOS list").queue();
+				return;
+			}
+
 			despairUser.kosList.add(hypixelPlayer.UUID.toString());
 			despairUser.save(true);
 

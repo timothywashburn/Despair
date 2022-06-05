@@ -6,6 +6,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
 import dev.kyro.despair.commands.*;
+import dev.kyro.despair.commands.admin.Blacklist;
 import dev.kyro.despair.commands.admin.ConfigCommand;
 import dev.kyro.despair.commands.admin.EcoCommand;
 import dev.kyro.despair.commands.admin.ExitCommand;
@@ -90,6 +91,7 @@ public class Despair {
 		DiscordManager.registerCommand(new ConfigCommand());
 		DiscordManager.registerCommand(new EcoCommand());
 		DiscordManager.registerCommand(new ExitCommand());
+		DiscordManager.registerCommand(new Blacklist());
 
 		DiscordManager.registerCommand(new HelpCommand());
 		DiscordManager.registerCommand(new PingCommand());
