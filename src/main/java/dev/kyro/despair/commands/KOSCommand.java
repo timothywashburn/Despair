@@ -115,6 +115,7 @@ public class KOSCommand extends DiscordCommand {
 				return;
 			}
 			despairUser.kosList.remove(removePlayer.uuid);
+			despairUser.tags.remove(removePlayer.uuid);
 			despairUser.save(true);
 
 			boolean shouldRemove = true;

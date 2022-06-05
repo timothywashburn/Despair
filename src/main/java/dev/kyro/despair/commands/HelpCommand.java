@@ -21,7 +21,8 @@ public class HelpCommand extends DiscordCommand {
 		helpMessage.add("> `" + prefix + "help` - View this message");
 		helpMessage.add("> `" + prefix + "kos` - Modify the KOS list");
 		helpMessage.add("> `" + prefix + "view` - View the KOS list");
-		helpMessage.add("> `" + prefix + "ping` - Visual check to see if the bot is responsive");
+		helpMessage.add("> `" + prefix + "notify/tags/pings` - You will be pinged for notifications of players on this list");
+		helpMessage.add("> `" + prefix + "status` - Visual check to see if the bot is responsive");
 		helpMessage.add("> `" + prefix + "bal` - Displays the number of credits you have");
 		helpMessage.add("> `" + prefix + "bump` - Increase the priority of an account on the KOS list");
 		helpMessage.add("> The [x] display where x is a number on the `.view` of the KOS " +

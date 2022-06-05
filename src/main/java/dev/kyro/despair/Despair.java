@@ -97,5 +97,6 @@ public class Despair {
 		DiscordManager.registerCommand(new ViewCommand());
 		DiscordManager.registerCommand(new BalanceCommand());
 		DiscordManager.registerCommand(new BumpCommand());
+		DiscordManager.registerCommand(new NotifyCommand());
 	}
 }

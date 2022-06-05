@@ -102,6 +102,8 @@ public class PlayerTracker extends Thread {
 			if(!despairUser.kosList.contains(kosPlayer.hypixelPlayer.UUID.toString())) continue;
 			if(despairUser.kosChannel == null) continue;
 
+			if(despairUser.tags.contains(kosPlayer.uuid)) notification += " <@" + despairUser.discordId + ">";
+
 			for(ThreadChannel threadChannel : despairUser.kosChannel.getThreadChannels()) {
 				if(threadChannel.getIdLong() != despairUser.kosMessageID) continue;
 				threadChannel.sendMessage(notification).queue();
