@@ -54,6 +54,7 @@ public class HypixelPlayer {
 			if(megastreak.equals("overdrive")) megastreak = "Overdrive";
 			if(megastreak.equals("beastmode")) megastreak = "Beastmode";
 			if(megastreak.equals("hermit")) megastreak = "Hermit";
+			if(megastreak.equals("highlander")) megastreak = "Highlander";
 			if(megastreak.equals("grand_finale")) megastreak = "Magnum Opus";
 			if(megastreak.equals("to_the_moon")) megastreak = "To The Moon";
 			if(megastreak.equals("uberstreak")) megastreak = "Uberstreak";
