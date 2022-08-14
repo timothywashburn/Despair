@@ -26,8 +26,8 @@ public class PlayerTracker extends Thread {
 				continue;
 			}
 
-			if(playerIteration.isEmpty() || count == playerIteration.size()) {
-				int playersExtra = getMaxPlayers() - count;
+			if(playerIteration.isEmpty() || count == playerIteration.size() || count == getMaxPlayers()) {
+				int playersExtra = Math.max(getMaxPlayers() - count, 0);
 				count = 0;
 				playerIteration.clear();
 				playerIteration.addAll(Despair.KOS.kosList);
@@ -97,7 +97,7 @@ public class PlayerTracker extends Thread {
 	}
 
 	public static int getMaxPlayers() {
-		return 20 * 1;
+		return Config.INSTANCE.MAX_PLAYERS;
 	}
 
 	public void sleepThread() {

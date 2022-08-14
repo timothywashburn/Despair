@@ -12,6 +12,7 @@ public class Config {
 
 	public String PREFIX = ".";
 	public String API_KEY = "";
+	public int MAX_PLAYERS = 20;
 	public long GUILD_ID;
 	public long DISPLAY_CHANNEL_ID;
 	public long DISPLAY_MESSAGE_ID;
@@ -23,10 +24,12 @@ public class Config {
 		INSTANCE = this;
 	}
 
-	public Config(String PREFIX, String API_KEY, long GUILD_ID, long DISPLAY_CHANNEL_ID, long DISPLAY_MESSAGE_ID, long NOTIFY_CHANNEL_ID, long MEMBER_ROLE_ID, long ADMIN_ROLE_ID) {
+	public Config(String PREFIX, String API_KEY, int MAX_PLAYERS, long GUILD_ID, long DISPLAY_CHANNEL_ID, long DISPLAY_MESSAGE_ID,
+				  long NOTIFY_CHANNEL_ID, long MEMBER_ROLE_ID, long ADMIN_ROLE_ID) {
 		this.PREFIX = PREFIX;
 		this.API_KEY = API_KEY;
 		this.GUILD_ID = GUILD_ID;
+		this.MAX_PLAYERS = MAX_PLAYERS;
 		this.DISPLAY_CHANNEL_ID = DISPLAY_CHANNEL_ID;
 		this.DISPLAY_MESSAGE_ID = DISPLAY_MESSAGE_ID;
 		this.NOTIFY_CHANNEL_ID = NOTIFY_CHANNEL_ID;
@@ -43,6 +46,9 @@ public class Config {
 				return;
 			case API_KEY:
 				API_KEY =  value;
+				return;
+			case MAX_PLAYERS:
+				MAX_PLAYERS = Integer.parseInt(value);
 				return;
 			case GUILD_ID:
 				GUILD_ID = Long.parseLong(value);
@@ -72,6 +78,8 @@ public class Config {
 				return PREFIX;
 			case API_KEY:
 				return API_KEY;
+			case MAX_PLAYERS:
+				return MAX_PLAYERS + "";
 			case GUILD_ID:
 				return GUILD_ID + "";
 			case DISPLAY_CHANNEL_ID:

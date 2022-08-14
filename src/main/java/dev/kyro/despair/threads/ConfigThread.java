@@ -41,15 +41,15 @@ public class ConfigThread extends Thread {
 				.setAuthor("Kyro#2820", "https://www.youtube.com/channel/UCNI4sS-0dFyTsANtz_eFXHA",
 						"https://cdn.discordapp.com/avatars/458458767634464792/5b6d2457fb627712063e1edf0d82eb71.png");
 
-		for(int i = 0; i < Configurable.values().length; i++) {
-			Configurable configurable = Configurable.values()[i];
+		for(int i = 0; i < Configurable.getConfigurables().length; i++) {
+			Configurable configurable = Configurable.getConfigurables()[i];
 			String currentValue = Config.INSTANCE.get(configurable);
 			embedBuilder.addField((i + 1) + ". " + configurable.displayName, currentValue.equals("0") ? "None" : currentValue, true);
 		}
 
 		channel.sendMessage(embedBuilder.build()).queue(message -> {
 			List<String> reactions = new ArrayList<>();
-			for(int i = 0; i < Configurable.values().length; i++) {
+			for(int i = 0; i < Configurable.getConfigurables().length; i++) {
 				message.addReaction(Misc.getUnicodeNumber(i + 1)).queue();
 				reactions.add(Misc.getUnicodeNumber(i + 1));
 			}
@@ -63,7 +63,7 @@ public class ConfigThread extends Thread {
 //							return;
 //						}
 						int reactionNum = Integer.parseInt(response.getReactionEmote().getName().charAt(0) + "");
-						configurable = Configurable.values()[reactionNum - 1];
+						configurable = Configurable.getConfigurables()[reactionNum - 1];
 						promptValue();
 					},
 					60, TimeUnit.SECONDS, () -> {
@@ -77,7 +77,20 @@ public class ConfigThread extends Thread {
 		DiscordManager.WAITER.waitForEvent(GuildMessageReceivedEvent.class,
 				response -> response.getAuthor().equals(author) && response.getChannel() == channel,
 				response -> {
-					if(configurable.configType == Configurable.ConfigType.SNOWFLAKE) {
+					if(configurable.configType == Configurable.ConfigType.NUMBER) {
+						try {
+							int value = Integer.parseInt(response.getMessage().getContentRaw());
+							if(configurable == Configurable.MAX_PLAYERS && (value < 1 || value > 120)) {
+								channel.sendMessage("Number must be between 1 and 120").queue();
+								promptValue();
+								return;
+							}
+						} catch(Exception ignored) {
+							channel.sendMessage("Invalid number").queue();
+							promptValue();
+							return;
+						}
+					} else if(configurable.configType == Configurable.ConfigType.SNOWFLAKE) {
 						if(response.getMessage().getContentRaw().equalsIgnoreCase("none")) {
 							Config.INSTANCE.set(configurable, "0");
 							Config.INSTANCE.save();

@@ -3,6 +3,7 @@ package dev.kyro.despair.controllers;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -24,7 +25,12 @@ public class KOSDisplay extends Thread {
 				continue;
 			}
 
-			String display = "DESPAIR KOS BOT ||@everyone||";
+			double seconds = PlayerTracker.getMaxPlayers() / 2.0;
+			DecimalFormat decimalFormat = new DecimalFormat("0.0");
+
+			String display = "DESPAIR KOS BOT ||@everyone||" +
+					"\n*Currently checking up to **" + PlayerTracker.getMaxPlayers() + "** player" + (PlayerTracker.getMaxPlayers() == 1 ? "" : "s") +
+					" every **" + decimalFormat.format(seconds) + "** seconds*";
 			String online = "\n\nONLINE";
 			String offline = "\n\nOFFLINE";
 
