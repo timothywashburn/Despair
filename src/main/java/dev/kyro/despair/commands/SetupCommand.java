@@ -60,25 +60,6 @@ public class SetupCommand extends DiscordCommand {
 					displayMessage.createThreadChannel("Notifications").queue();
 				});
 			});
-			guild.createTextChannel("kos-alerts", category).queue(notifyChannel -> {
-				Config.INSTANCE.set(Configurable.NOTIFY_CHANNEL_ID, notifyChannel.getId());
-				Config.INSTANCE.save();
-			});
 		});
-
-//		String subCommand = args.get(0).toLowerCase();
-//		if(subCommand.equals("display")) {
-//			if(event.getGuild().getIdLong() != Config.INSTANCE.GUILD_ID) {
-//				event.getChannel().sendMessage("Guild ID does not match").queue();
-//				return;
-//			}
-//
-//			Config.INSTANCE.set(Configurable.DISPLAY_CHANNEL_ID, event.getChannel().getId());
-//			event.getChannel().sendMessage("Setting up display message").queue(message -> {
-//				Config.INSTANCE.set(Configurable.DISPLAY_MESSAGE_ID, message.getId());
-//				Config.INSTANCE.save();
-//				event.getMessage().delete().queueAfter(1, TimeUnit.SECONDS);
-//			});
-//		}
 	}
 }

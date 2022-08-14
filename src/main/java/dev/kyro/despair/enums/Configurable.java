@@ -12,7 +12,6 @@ public enum Configurable {
 	GUILD_ID("Server", ConfigType.SNOWFLAKE, true, "server"),
 	DISPLAY_CHANNEL_ID("Display Channel", ConfigType.SNOWFLAKE, true, "display"),
 	DISPLAY_MESSAGE_ID("Display Message", ConfigType.SNOWFLAKE, true, "message"),
-	NOTIFY_CHANNEL_ID("Notification Channel", ConfigType.SNOWFLAKE, true, "notif"),
 	MEMBER_ROLE_ID("Member Role", ConfigType.SNOWFLAKE, false, "member"),
 	ADMIN_ROLE_ID("Admin Role", ConfigType.SNOWFLAKE, false, "admin");
 
@@ -26,13 +25,6 @@ public enum Configurable {
 		this.configType = configType;
 		this.isHidden = isHidden;
 		this.keys = Arrays.asList(keys);
-	}
-
-	public int getNum() {
-		for(int i = 0; i < values().length; i++) {
-			if(values()[i] == this) return i + 1;
-		}
-		return -1;
 	}
 
 	public static Configurable[] getConfigurables() {

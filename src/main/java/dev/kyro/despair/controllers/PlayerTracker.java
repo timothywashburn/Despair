@@ -5,6 +5,7 @@ import dev.kyro.despair.exceptions.InvalidAPIKeyException;
 import dev.kyro.despair.exceptions.NoAPIKeyException;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.ThreadChannel;
 import org.json.JSONObject;
 
 import java.text.DecimalFormat;
@@ -75,23 +76,30 @@ public class PlayerTracker extends Thread {
 //				Check notify cooldown
 				boolean canNotify = notifyCooldown.getOrDefault(hypixelPlayer.UUID, 0L) + 60_500 < System.currentTimeMillis();
 
+//				Guild check
 				Guild guild = DiscordManager.JDA.getGuildById(Config.INSTANCE.GUILD_ID);
 				if(guild != null) {
 
-					TextChannel notifyChannel = guild.getTextChannelById(Config.INSTANCE.NOTIFY_CHANNEL_ID);
-					if(notifyChannel != null) {
-						if(!wasOnline && hypixelPlayer.isOnline) notifyChannel.sendMessage("Login: `" + hypixelPlayer.name + "`").queue();
-						if(wasOnline && !hypixelPlayer.isOnline) notifyChannel.sendMessage("Logout: `" + hypixelPlayer.name + "`").queue();
+//					Display channel check
+					TextChannel displayChannel = guild.getTextChannelById(Config.INSTANCE.DISPLAY_CHANNEL_ID);
+					if(displayChannel != null) {
 
-						if(isPlayerStreaking(hypixelPlayer)) {
-							String pingString = "";
-							for(Users.DiscordUser discordUser : Users.INSTANCE.getUsersWithTags(hypixelPlayer, kosPlayer.tags)) {
-								pingString += " <@" + discordUser.id + ">";
-							}
-							if(canNotify) {
-								notifyChannel.sendMessage("Streaking: `" + hypixelPlayer.name + "`" + pingString).queue();
-//								Put on notify cooldown
-								notifyCooldown.put(hypixelPlayer.UUID, System.currentTimeMillis());
+//						Thread check
+						for(ThreadChannel threadChannel : displayChannel.getThreadChannels()) {
+							if(threadChannel.getIdLong() != Config.INSTANCE.DISPLAY_MESSAGE_ID) continue;
+							if(!wasOnline && hypixelPlayer.isOnline) threadChannel.sendMessage("Login: `" + hypixelPlayer.name + "`").queue();
+							if(wasOnline && !hypixelPlayer.isOnline) threadChannel.sendMessage("Logout: `" + hypixelPlayer.name + "`").queue();
+
+							if(isPlayerStreaking(hypixelPlayer)) {
+								String pingString = "";
+								for(Users.DiscordUser discordUser : Users.INSTANCE.getUsersWithTags(hypixelPlayer, kosPlayer.tags)) {
+									pingString += " <@" + discordUser.id + ">";
+								}
+								if(canNotify) {
+									threadChannel.sendMessage("Streaking: `" + hypixelPlayer.name + "`" + pingString).queue();
+//									Put on notify cooldown
+									notifyCooldown.put(hypixelPlayer.UUID, System.currentTimeMillis());
+								}
 							}
 						}
 					}
