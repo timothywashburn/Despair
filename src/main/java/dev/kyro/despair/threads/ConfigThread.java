@@ -7,8 +7,8 @@ import dev.kyro.despair.misc.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -47,14 +47,14 @@ public class ConfigThread extends Thread {
 			embedBuilder.addField((i + 1) + ". " + configurable.displayName, currentValue.equals("0") ? "None" : currentValue, true);
 		}
 
-		channel.sendMessage(embedBuilder.build()).queue(message -> {
+		channel.sendMessageEmbeds(embedBuilder.build()).queue(message -> {
 			List<String> reactions = new ArrayList<>();
 			for(int i = 0; i < Configurable.getConfigurables().length; i++) {
 				message.addReaction(Misc.getUnicodeNumber(i + 1)).queue();
 				reactions.add(Misc.getUnicodeNumber(i + 1));
 			}
 //			message.addReaction("\u27a1").queue();
-			DiscordManager.WAITER.waitForEvent(GuildMessageReactionAddEvent.class,
+			DiscordManager.WAITER.waitForEvent(MessageReactionAddEvent.class,
 					response -> response.getUserIdLong() == author.getIdLong() && response.getMessageIdLong() == message.getIdLong()
 							&& reactions.contains(response.getReactionEmote().getName()),
 					response -> {
@@ -74,7 +74,7 @@ public class ConfigThread extends Thread {
 	public void promptValue() {
 
 		channel.sendMessage(configurable.displayName + ": " + configurable.configType.instructions).queue();
-		DiscordManager.WAITER.waitForEvent(GuildMessageReceivedEvent.class,
+		DiscordManager.WAITER.waitForEvent(MessageReceivedEvent.class,
 				response -> response.getAuthor().equals(author) && response.getChannel() == channel,
 				response -> {
 					if(configurable.configType == Configurable.ConfigType.NUMBER) {
