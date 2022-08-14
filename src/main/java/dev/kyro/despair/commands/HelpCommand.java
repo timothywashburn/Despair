@@ -35,8 +35,7 @@ public class HelpCommand extends DiscordCommand {
 		helpMessage.add("> `" + prefix + "kos` - Modify the kos");
 		helpMessage.add("> `" + prefix + "ping` - Visual check to see if the bot is responsive");
 		helpMessage.add("> `" + prefix + "config` - Modify config values");
-		helpMessage.add("> `" + prefix + "setup` - Command to easily set up the display message (way easier than trying to use the config)");
-		helpMessage.add("> `" + prefix + "key` - Modify api keys and their respective proxies");
+		helpMessage.add("> `" + prefix + "setup` - Set up all channels for the bot");
 		helpMessage.add("> `" + prefix + "notify` - Notifies you when certain players begin streaking (tags can be either added to player on .kos add <name> [tag-1] [tag-2]..." +
 				", be the players name, or be \"all\")");
 		helpMessage.add("> The `*` character displayed next to a name on the kos signifies as an API disabled player." +
