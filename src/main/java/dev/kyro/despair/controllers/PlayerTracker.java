@@ -87,8 +87,13 @@ public class PlayerTracker extends Thread {
 //						Thread check
 						for(ThreadChannel threadChannel : displayChannel.getThreadChannels()) {
 							if(threadChannel.getIdLong() != Config.INSTANCE.DISPLAY_MESSAGE_ID) continue;
-							if(!wasOnline && hypixelPlayer.isOnline) threadChannel.sendMessage("Login: `" + hypixelPlayer.name + "`").queue();
-							if(wasOnline && !hypixelPlayer.isOnline) threadChannel.sendMessage("Logout: `" + hypixelPlayer.name + "`").queue();
+
+							if(System.currentTimeMillis() - Despair.START_TIME - 500L > 1000L * PlayerTracker.getMaxPlayers()) {
+								if(!wasOnline && hypixelPlayer.isOnline)
+									threadChannel.sendMessage("Login: `" + hypixelPlayer.name + "`").queue();
+								if(wasOnline && !hypixelPlayer.isOnline)
+									threadChannel.sendMessage("Logout: `" + hypixelPlayer.name + "`").queue();
+							}
 
 							if(isPlayerStreaking(hypixelPlayer)) {
 								String pingString = "";

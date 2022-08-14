@@ -23,6 +23,8 @@ public class Despair {
 	public static Users USERS;
 	public static Config CONFIG;
 
+	public static long START_TIME = System.currentTimeMillis();
+
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 		Logger.getRootLogger().setLevel(Level.INFO);
