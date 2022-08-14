@@ -9,13 +9,13 @@ import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
 
 public class PlayerTracker extends Thread {
 	public static int count = 0;
 	public static ArrayList<KOS.KOSPlayer> playerIteration = new ArrayList<>();
 	public static long lastIteration;
+	public static Map<UUID, Long> notifyCooldown = new HashMap<>();
 
 	@Override
 	public void run() {
@@ -72,8 +72,12 @@ public class PlayerTracker extends Thread {
 					KOS.INSTANCE.save();
 				}
 
+//				Check notify cooldown
+				boolean canNotify = notifyCooldown.getOrDefault(hypixelPlayer.UUID, 0L) + 60_500 < System.currentTimeMillis();
+
 				Guild guild = DiscordManager.JDA.getGuildById(Config.INSTANCE.GUILD_ID);
 				if(guild != null) {
+
 					TextChannel notifyChannel = guild.getTextChannelById(Config.INSTANCE.NOTIFY_CHANNEL_ID);
 					if(notifyChannel != null) {
 						if(!wasOnline && hypixelPlayer.isOnline) notifyChannel.sendMessage("Login: `" + hypixelPlayer.name + "`").queue();
@@ -82,10 +86,14 @@ public class PlayerTracker extends Thread {
 						if(hypixelPlayer.recentKills.size() > 2 &&hypixelPlayer.recentKills.get(hypixelPlayer.recentKills.size() - 1) -
 								hypixelPlayer.recentKills.get(hypixelPlayer.recentKills.size() - 2) != 0) {
 							String pingString = "";
-							for(Users.DiscordUser discordUser : Users.INSTANCE.getUsersWithTags(hypixelPlayer.name, kosPlayer.tags)) {
+							for(Users.DiscordUser discordUser : Users.INSTANCE.getUsersWithTags(hypixelPlayer, kosPlayer.tags)) {
 								pingString += " <@" + discordUser.id + ">";
 							}
-							notifyChannel.sendMessage("Streaking: `" + hypixelPlayer.name + "`" + pingString).queue();
+							if(canNotify) {
+								notifyChannel.sendMessage("Streaking: `" + hypixelPlayer.name + "`" + pingString).queue();
+//								Put on notify cooldown
+								notifyCooldown.put(hypixelPlayer.UUID, System.currentTimeMillis());
+							}
 						}
 					}
 				}
