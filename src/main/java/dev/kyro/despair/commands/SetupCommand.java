@@ -2,6 +2,7 @@ package dev.kyro.despair.commands;
 
 import dev.kyro.despair.controllers.Config;
 import dev.kyro.despair.controllers.DiscordCommand;
+import dev.kyro.despair.controllers.KOSDisplay;
 import dev.kyro.despair.enums.Configurable;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -53,9 +54,10 @@ public class SetupCommand extends DiscordCommand {
 		guild.createCategory("KOS").queue(category -> {
 			guild.createTextChannel("kos-display", category).queue(displayChannel -> {
 				Config.INSTANCE.set(Configurable.DISPLAY_CHANNEL_ID, displayChannel.getId());
-				displayChannel.sendMessage("KOS Display Message").queue(displayMessage -> {
+				displayChannel.sendMessage(KOSDisplay.createKOSMessage().replace(" ||@everyone||", "")).queue(displayMessage -> {
 					Config.INSTANCE.set(Configurable.DISPLAY_MESSAGE_ID, displayMessage.getId());
 					Config.INSTANCE.save();
+					displayMessage.createThreadChannel("Notifications").queue();
 				});
 			});
 			guild.createTextChannel("kos-alerts", category).queue(notifyChannel -> {

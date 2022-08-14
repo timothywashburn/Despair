@@ -25,64 +25,68 @@ public class KOSDisplay extends Thread {
 				continue;
 			}
 
-			double seconds = PlayerTracker.getMaxPlayers() / 2.0;
-			DecimalFormat decimalFormat = new DecimalFormat("0.0");
-
-			String display = "DESPAIR KOS BOT ||@everyone||" +
-					"\n*Currently checking up to **" + PlayerTracker.getMaxPlayers() + "** player" + (PlayerTracker.getMaxPlayers() == 1 ? "" : "s") +
-					" every **" + decimalFormat.format(seconds) + "** seconds*";
-			String online = "\n\nONLINE";
-			String offline = "\n\nOFFLINE";
-
-			int onlinePlayerCount = 0; int offlinePlayerCount = 0;
-			for(KOS.KOSPlayer player : KOS.INSTANCE.kosList) {
-				if(player.hypixelPlayer.isOnline) onlinePlayerCount++; else offlinePlayerCount++;
-			}
-			online += " (" + onlinePlayerCount + "/" + KOS.INSTANCE.kosList.size() + ")";
-			offline += " (" + offlinePlayerCount + "/" + KOS.INSTANCE.kosList.size() + ")";
-
-			for(KOS.KOSPlayer player : KOS.INSTANCE.kosList) {
-				if(player.hypixelPlayer.lastLogin == 0) continue;
-				if(player.hypixelPlayer.isOnline) {
-					String recentKills = "";
-					if(player.hypixelPlayer.recentKills.size() < 2) {
-						recentKills += 0;
-					} else {
-						for(int j = 1; j < player.hypixelPlayer.recentKills.size(); j++)
-								recentKills += player.hypixelPlayer.recentKills.get(j) - player.hypixelPlayer.recentKills.get(j - 1) + " ";
-					}
-					recentKills = recentKills.trim();
-					online += "\n> `" + player.name + "` - `" + player.hypixelPlayer.megastreak + "` [" + player.hypixelPlayer.getRecentKills() + "] ||[" + recentKills + "]||";
-				} else if(player.hypixelPlayer.isOnlineWithApiDisabled()) {
-					String recentKills = "";
-					if(player.hypixelPlayer.recentKills.size() < 2) {
-						recentKills += 0;
-					} else {
-						for(int j = 1; j < player.hypixelPlayer.recentKills.size(); j++)
-							recentKills += player.hypixelPlayer.recentKills.get(j) - player.hypixelPlayer.recentKills.get(j - 1) + " ";
-					}
-					recentKills = recentKills.trim();
-					online += "\n> *`" + player.name + "` - `" + player.hypixelPlayer.megastreak + "` [" + player.hypixelPlayer.getRecentKills() + "] ||[" + recentKills + "]||";
-				} else {
-					offline += "\n> ";
-					if(player.hypixelPlayer.apiDisabled) offline += "*";
-					offline += "`" + player.name + "` - " + player.hypixelPlayer.getTimeOffline();
-				}
-			}
-
-			display += online;
-			display += offline;
-
-			String pattern = "HH:mm:ss"; SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
-			display += "\n\n" + dateFormat.format(new Date().getTime() + 3 * 60 * 60 * 1000) + " EST";
-
-			String finalDisplay = display;
+			String display = createKOSMessage();
 			displayChannel.retrieveMessageById(Config.INSTANCE.DISPLAY_MESSAGE_ID).queue((message) -> {
-				message.editMessage(finalDisplay).queue();
+				message.editMessage(display).queue();
 			}, failure -> {});
 
 			sleepThread();
 		}
+	}
+
+	public static String createKOSMessage() {
+		double seconds = PlayerTracker.getMaxPlayers() / 2.0;
+		DecimalFormat decimalFormat = new DecimalFormat("0.0");
+
+		String display = "DESPAIR KOS BOT ||@everyone||" +
+				"\n*Currently checking up to **" + PlayerTracker.getMaxPlayers() + "** player" + (PlayerTracker.getMaxPlayers() == 1 ? "" : "s") +
+				" every **" + decimalFormat.format(seconds) + "** seconds*";
+		String online = "\n\nONLINE";
+		String offline = "\n\nOFFLINE";
+
+		int onlinePlayerCount = 0; int offlinePlayerCount = 0;
+		for(KOS.KOSPlayer player : KOS.INSTANCE.kosList) {
+			if(player.hypixelPlayer.isOnline) onlinePlayerCount++; else offlinePlayerCount++;
+		}
+		online += " (" + onlinePlayerCount + "/" + KOS.INSTANCE.kosList.size() + ")";
+		offline += " (" + offlinePlayerCount + "/" + KOS.INSTANCE.kosList.size() + ")";
+
+		for(KOS.KOSPlayer player : KOS.INSTANCE.kosList) {
+			if(player.hypixelPlayer.lastLogin == 0) continue;
+			if(player.hypixelPlayer.isOnline) {
+				String recentKills = "";
+				if(player.hypixelPlayer.recentKills.size() < 2) {
+					recentKills += 0;
+				} else {
+					for(int j = 1; j < player.hypixelPlayer.recentKills.size(); j++)
+						recentKills += player.hypixelPlayer.recentKills.get(j) - player.hypixelPlayer.recentKills.get(j - 1) + " ";
+				}
+				recentKills = recentKills.trim();
+				online += "\n> `" + player.name + "` - `" + player.hypixelPlayer.megastreak + "` [" + player.hypixelPlayer.getRecentKills() + "] ||[" + recentKills + "]||";
+			} else if(player.hypixelPlayer.isOnlineWithApiDisabled()) {
+				String recentKills = "";
+				if(player.hypixelPlayer.recentKills.size() < 2) {
+					recentKills += 0;
+				} else {
+					for(int j = 1; j < player.hypixelPlayer.recentKills.size(); j++)
+						recentKills += player.hypixelPlayer.recentKills.get(j) - player.hypixelPlayer.recentKills.get(j - 1) + " ";
+				}
+				recentKills = recentKills.trim();
+				online += "\n> *`" + player.name + "` - `" + player.hypixelPlayer.megastreak + "` [" + player.hypixelPlayer.getRecentKills() + "] ||[" + recentKills + "]||";
+			} else {
+				offline += "\n> ";
+				if(player.hypixelPlayer.apiDisabled) offline += "*";
+				offline += "`" + player.name + "` - " + player.hypixelPlayer.getTimeOffline();
+			}
+		}
+
+		display += online;
+		display += offline;
+
+		String pattern = "HH:mm:ss"; SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+		display += "\n\n" + dateFormat.format(new Date().getTime() + 3 * 60 * 60 * 1000) + " EST";
+
+		return display;
 	}
 
 	public void sleepThread() {
