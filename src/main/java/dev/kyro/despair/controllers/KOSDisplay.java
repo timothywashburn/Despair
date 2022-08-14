@@ -34,13 +34,15 @@ public class KOSDisplay extends Thread {
 		}
 	}
 
-	public static String createKOSMessage() {
+	public static String createCurrentlyTracking() {
 		double seconds = PlayerTracker.getMaxPlayers() / 2.0;
 		DecimalFormat decimalFormat = new DecimalFormat("0.0");
+		return "checking up to **" + PlayerTracker.getMaxPlayers() + "** player" + (PlayerTracker.getMaxPlayers() == 1 ? "" : "s") +
+				" every **" + decimalFormat.format(seconds) + "** seconds";
+	}
 
-		String display = "DESPAIR KOS BOT ||@everyone||" +
-				"\n*Currently checking up to **" + PlayerTracker.getMaxPlayers() + "** player" + (PlayerTracker.getMaxPlayers() == 1 ? "" : "s") +
-				" every **" + decimalFormat.format(seconds) + "** seconds*";
+	public static String createKOSMessage() {
+		String display = "DESPAIR KOS BOT ||@everyone||\nCurrently *" + createCurrentlyTracking() + "*";
 		String online = "\n\nONLINE";
 		String offline = "\n\nOFFLINE";
 

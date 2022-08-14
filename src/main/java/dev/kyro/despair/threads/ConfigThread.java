@@ -2,6 +2,7 @@ package dev.kyro.despair.threads;
 
 import dev.kyro.despair.controllers.Config;
 import dev.kyro.despair.controllers.DiscordManager;
+import dev.kyro.despair.controllers.KOSDisplay;
 import dev.kyro.despair.enums.Configurable;
 import dev.kyro.despair.misc.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -115,7 +116,11 @@ public class ConfigThread extends Thread {
 					}
 					Config.INSTANCE.set(configurable, response.getMessage().getContentRaw());
 					Config.INSTANCE.save();
-					channel.sendMessage("Updated " + configurable.displayName + " to " + Config.INSTANCE.get(configurable)).queue();
+					if(configurable == Configurable.MAX_PLAYERS) {
+						channel.sendMessage("Now " + KOSDisplay.createCurrentlyTracking()).queue();
+					} else {
+						channel.sendMessage("Updated " + configurable.displayName + " to " + Config.INSTANCE.get(configurable)).queue();
+					}
 				},
 				60, TimeUnit.SECONDS, this::timeExpired);
 	}
