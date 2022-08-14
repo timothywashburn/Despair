@@ -103,6 +103,15 @@ public class KOSCommand extends DiscordCommand {
 				}
 				return;
 			}
+			if(removePlayer.hypixelPlayer == null) {
+				event.getChannel().sendMessage("Something went wrong while attempting to remove player. Please report this").queue();
+				return;
+			}
+
+			for(Users.DiscordUser users : Users.INSTANCE.getUsersWithTags(removePlayer.hypixelPlayer, removePlayer.tags)) {
+				users.tags.remove(removePlayer.uuid);
+			}
+			Users.INSTANCE.save();
 
 			KOS.INSTANCE.removePlayer(removePlayer, true);
 			event.getChannel().sendMessage("Removed player: " + removePlayer.name).queue();

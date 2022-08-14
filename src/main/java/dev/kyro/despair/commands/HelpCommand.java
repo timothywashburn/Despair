@@ -37,7 +37,7 @@ public class HelpCommand extends DiscordCommand {
 		helpMessage.add("> `" + prefix + "config` - Modify config values");
 		helpMessage.add("> `" + prefix + "setup` - Set up all channels for the bot");
 		helpMessage.add("> `" + prefix + "notify` - Notifies you when certain players begin streaking (tags can be either added to player on .kos add <name> [tag-1] [tag-2]..." +
-				", be the players name, or be \"all\")");
+				", be the players name, or be \"all\" or \"uber\")");
 		helpMessage.add("> The `*` character displayed next to a name on the kos signifies as an API disabled player." +
 				" Such players can only be detected by whether or not they are streaking, and their online/offline status is an assumption based off of that data");
 

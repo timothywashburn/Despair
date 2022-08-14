@@ -23,9 +23,10 @@ public class Users {
 	}
 
 	@Exclude
-	public List<DiscordUser> getUsersWithTags(String name, List<String> tags) {
+	public List<DiscordUser> getUsersWithTags(HypixelPlayer hypixelPlayer, List<String> tags) {
 		List<String> newTags = new ArrayList<>(tags);
-		newTags.add(name.toLowerCase());
+		newTags.add(hypixelPlayer.name.toLowerCase());
+		if(hypixelPlayer.megastreak.equals("Uberstreak") && PlayerTracker.isPlayerStreaking(hypixelPlayer)) newTags.add("uber");
 		return getUsersWithTags(newTags);
 	}
 

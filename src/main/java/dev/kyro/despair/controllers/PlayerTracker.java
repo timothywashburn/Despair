@@ -83,8 +83,7 @@ public class PlayerTracker extends Thread {
 						if(!wasOnline && hypixelPlayer.isOnline) notifyChannel.sendMessage("Login: `" + hypixelPlayer.name + "`").queue();
 						if(wasOnline && !hypixelPlayer.isOnline) notifyChannel.sendMessage("Logout: `" + hypixelPlayer.name + "`").queue();
 
-						if(hypixelPlayer.recentKills.size() > 2 &&hypixelPlayer.recentKills.get(hypixelPlayer.recentKills.size() - 1) -
-								hypixelPlayer.recentKills.get(hypixelPlayer.recentKills.size() - 2) != 0) {
+						if(isPlayerStreaking(hypixelPlayer)) {
 							String pingString = "";
 							for(Users.DiscordUser discordUser : Users.INSTANCE.getUsersWithTags(hypixelPlayer, kosPlayer.tags)) {
 								pingString += " <@" + discordUser.id + ">";
@@ -102,6 +101,11 @@ public class PlayerTracker extends Thread {
 			count++;
 			sleepThread();
 		}
+	}
+
+	public static boolean isPlayerStreaking(HypixelPlayer hypixelPlayer) {
+		return hypixelPlayer.recentKills.size() > 2 && hypixelPlayer.recentKills.get(hypixelPlayer.recentKills.size() - 1) -
+				hypixelPlayer.recentKills.get(hypixelPlayer.recentKills.size() - 2) != 0;
 	}
 
 	public static int getMaxPlayers() {
