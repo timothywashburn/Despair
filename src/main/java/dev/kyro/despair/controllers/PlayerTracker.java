@@ -87,19 +87,19 @@ public class PlayerTracker extends Thread {
 //						Thread check
 						for(ThreadChannel threadChannel : displayChannel.getThreadChannels()) {
 							if(threadChannel.getIdLong() != Config.INSTANCE.DISPLAY_MESSAGE_ID) continue;
+							String pingString = "";
+							for(Users.DiscordUser discordUser : Users.INSTANCE.getUsersWithTags(hypixelPlayer, kosPlayer.tags)) {
+								pingString += " <@" + discordUser.id + ">";
+							}
 
 							if(System.currentTimeMillis() - Despair.START_TIME - 500L > 1000L * PlayerTracker.getMaxPlayers()) {
 								if(!wasOnline && hypixelPlayer.isOnline)
-									threadChannel.sendMessage("Login: `" + hypixelPlayer.name + "`").queue();
+									threadChannel.sendMessage("Login: `" + hypixelPlayer.name + "`" + pingString).queue();
 								if(wasOnline && !hypixelPlayer.isOnline)
 									threadChannel.sendMessage("Logout: `" + hypixelPlayer.name + "`").queue();
 							}
 
 							if(isPlayerStreaking(hypixelPlayer)) {
-								String pingString = "";
-								for(Users.DiscordUser discordUser : Users.INSTANCE.getUsersWithTags(hypixelPlayer, kosPlayer.tags)) {
-									pingString += " <@" + discordUser.id + ">";
-								}
 								if(canNotify) {
 									threadChannel.sendMessage("Streaking: `" + hypixelPlayer.name + "`" + pingString).queue();
 //									Put on notify cooldown
