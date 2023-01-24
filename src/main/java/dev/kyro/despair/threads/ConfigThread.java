@@ -2,13 +2,14 @@ package dev.kyro.despair.threads;
 
 import dev.kyro.despair.controllers.Config;
 import dev.kyro.despair.controllers.DiscordManager;
+import dev.kyro.despair.controllers.KOSDisplay;
 import dev.kyro.despair.enums.Configurable;
 import dev.kyro.despair.misc.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -41,20 +42,20 @@ public class ConfigThread extends Thread {
 				.setAuthor("Kyro#2820", "https://www.youtube.com/channel/UCNI4sS-0dFyTsANtz_eFXHA",
 						"https://cdn.discordapp.com/avatars/458458767634464792/5b6d2457fb627712063e1edf0d82eb71.png");
 
-		for(int i = 0; i < Configurable.values().length; i++) {
-			Configurable configurable = Configurable.values()[i];
+		for(int i = 0; i < Configurable.getConfigurables().length; i++) {
+			Configurable configurable = Configurable.getConfigurables()[i];
 			String currentValue = Config.INSTANCE.get(configurable);
 			embedBuilder.addField((i + 1) + ". " + configurable.displayName, currentValue.equals("0") ? "None" : currentValue, true);
 		}
 
-		channel.sendMessage(embedBuilder.build()).queue(message -> {
+		channel.sendMessageEmbeds(embedBuilder.build()).queue(message -> {
 			List<String> reactions = new ArrayList<>();
-			for(int i = 0; i < Configurable.values().length; i++) {
+			for(int i = 0; i < Configurable.getConfigurables().length; i++) {
 				message.addReaction(Misc.getUnicodeNumber(i + 1)).queue();
 				reactions.add(Misc.getUnicodeNumber(i + 1));
 			}
 //			message.addReaction("\u27a1").queue();
-			DiscordManager.WAITER.waitForEvent(GuildMessageReactionAddEvent.class,
+			DiscordManager.WAITER.waitForEvent(MessageReactionAddEvent.class,
 					response -> response.getUserIdLong() == author.getIdLong() && response.getMessageIdLong() == message.getIdLong()
 							&& reactions.contains(response.getReactionEmote().getName()),
 					response -> {
@@ -63,7 +64,7 @@ public class ConfigThread extends Thread {
 //							return;
 //						}
 						int reactionNum = Integer.parseInt(response.getReactionEmote().getName().charAt(0) + "");
-						configurable = Configurable.values()[reactionNum - 1];
+						configurable = Configurable.getConfigurables()[reactionNum - 1];
 						promptValue();
 					},
 					60, TimeUnit.SECONDS, () -> {
@@ -74,10 +75,23 @@ public class ConfigThread extends Thread {
 	public void promptValue() {
 
 		channel.sendMessage(configurable.displayName + ": " + configurable.configType.instructions).queue();
-		DiscordManager.WAITER.waitForEvent(GuildMessageReceivedEvent.class,
+		DiscordManager.WAITER.waitForEvent(MessageReceivedEvent.class,
 				response -> response.getAuthor().equals(author) && response.getChannel() == channel,
 				response -> {
-					if(configurable.configType == Configurable.ConfigType.SNOWFLAKE) {
+					if(configurable.configType == Configurable.ConfigType.NUMBER) {
+						try {
+							int value = Integer.parseInt(response.getMessage().getContentRaw());
+							if(configurable == Configurable.MAX_PLAYERS && (value < 1 || value > 120)) {
+								channel.sendMessage("Number must be between 1 and 120").queue();
+								promptValue();
+								return;
+							}
+						} catch(Exception ignored) {
+							channel.sendMessage("Invalid number").queue();
+							promptValue();
+							return;
+						}
+					} else if(configurable.configType == Configurable.ConfigType.SNOWFLAKE) {
 						if(response.getMessage().getContentRaw().equalsIgnoreCase("none")) {
 							Config.INSTANCE.set(configurable, "0");
 							Config.INSTANCE.save();
@@ -102,7 +116,11 @@ public class ConfigThread extends Thread {
 					}
 					Config.INSTANCE.set(configurable, response.getMessage().getContentRaw());
 					Config.INSTANCE.save();
-					channel.sendMessage("Updated " + configurable.displayName + " to " + Config.INSTANCE.get(configurable)).queue();
+					if(configurable == Configurable.MAX_PLAYERS) {
+						channel.sendMessage("Now " + KOSDisplay.createCurrentlyTracking()).queue();
+					} else {
+						channel.sendMessage("Updated " + configurable.displayName + " to " + Config.INSTANCE.get(configurable)).queue();
+					}
 				},
 				60, TimeUnit.SECONDS, this::timeExpired);
 	}

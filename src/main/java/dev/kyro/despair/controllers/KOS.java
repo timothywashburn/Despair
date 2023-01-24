@@ -9,10 +9,13 @@ import java.util.List;
 import java.util.UUID;
 
 public class KOS {
-    @Exclude public static KOS INSTANCE;
+    @Exclude
+    public static KOS INSTANCE;
     public List<KOSPlayer> kosList = new ArrayList<>();
-    @Exclude public boolean onSaveCooldown = false;
-    @Exclude public boolean saveQueued = false;
+    @Exclude
+    public boolean onSaveCooldown = false;
+    @Exclude
+    public boolean saveQueued = false;
 
     public KOS() {
         INSTANCE = this;
@@ -63,7 +66,7 @@ public class KOS {
                 save();
             }).start();
         }
-        if(!saveQueued && !onSaveCooldown){
+        if(!saveQueued && !onSaveCooldown) {
             Despair.FIRESTORE.collection(Variables.COLLECTION).document("kos").set(this);
             onSaveCooldown = true;
             new Thread(() -> {
@@ -81,8 +84,10 @@ public class KOS {
 
         public String name;
         public String uuid;
+        public List<String> tags = new ArrayList<>();
 
-        @Exclude public HypixelPlayer hypixelPlayer;
+        @Exclude
+        public HypixelPlayer hypixelPlayer;
 
         public KOSPlayer() { }
 
@@ -91,9 +96,21 @@ public class KOS {
             hypixelPlayer = new HypixelPlayer(UUID.fromString(uuid));
         }
 
-        public KOSPlayer(String name, String uuid) {
+        public KOSPlayer(String name, String uuid, List<String> tags) {
             this.name = name;
             setUuid(uuid);
+            this.tags = tags;
+        }
+
+        @Exclude
+        public String getTagsAsString() {
+            if(tags.isEmpty()) return "";
+            String tagString = " [";
+            for(int i = 0; i < tags.size(); i++) {
+                if(i != 0) tagString += ", ";
+                tagString += "`" + tags.get(i) + "`";
+            }
+            return tagString + "]";
         }
     }
 }

@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile 'net.dv8tion:JDA:4.2.0_232'
+    compile 'net.dv8tion:JDA:5.0.0-alpha.12'
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5'
     compile group: 'org.json', name: 'json', version: '20201115'
     compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
