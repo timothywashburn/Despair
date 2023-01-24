@@ -9,9 +9,12 @@ public enum Configurable {
 	PREFIX("Bot Prefix", ConfigType.STRING, false, "prefix"),
 	API_KEY("Api Key", ConfigType.STRING, false, "api"),
 	MAX_PLAYERS("Max Players", ConfigType.NUMBER, false, "max"),
+	TRUCE_CATEGORIES("Truce Categories", ConfigType.STRING_LOWER, false, "trucecategories"),
 	GUILD_ID("Server", ConfigType.SNOWFLAKE, true, "server"),
-	DISPLAY_CHANNEL_ID("Display Channel", ConfigType.SNOWFLAKE, true, "display"),
-	DISPLAY_MESSAGE_ID("Display Message", ConfigType.SNOWFLAKE, true, "message"),
+	KOS_DISPLAY_CHANNEL_ID("KOS Display Channel", ConfigType.SNOWFLAKE, true, "kosdisplay"),
+	KOS_DISPLAY_MESSAGE_ID("KOS Display Message", ConfigType.SNOWFLAKE, true, "kosmessage"),
+	TRUCE_DISPLAY_CHANNEL_ID("Truce Display Message", ConfigType.SNOWFLAKE, true, "trucedisplay"),
+	TRUCE_DISPLAY_MESSAGE_ID("Truce Display Message", ConfigType.SNOWFLAKE, true, "trucemessage"),
 	MEMBER_ROLE_ID("Member Role", ConfigType.SNOWFLAKE, false, "member"),
 	ADMIN_ROLE_ID("Admin Role", ConfigType.SNOWFLAKE, false, "admin");
 
@@ -38,6 +41,7 @@ public enum Configurable {
 
 	public enum ConfigType {
 		STRING("Input string"),
+		STRING_LOWER("Input string"),
 		NUMBER("Input value"),
 		SNOWFLAKE("Input id");
 

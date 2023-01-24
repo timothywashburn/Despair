@@ -1,8 +1,8 @@
 package dev.kyro.despair.threads;
 
-import dev.kyro.despair.controllers.Config;
+import dev.kyro.despair.firestore.Config;
 import dev.kyro.despair.controllers.DiscordManager;
-import dev.kyro.despair.controllers.KOSDisplay;
+import dev.kyro.despair.controllers.DisplayManager;
 import dev.kyro.despair.enums.Configurable;
 import dev.kyro.despair.misc.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -78,9 +78,10 @@ public class ConfigThread extends Thread {
 		DiscordManager.WAITER.waitForEvent(MessageReceivedEvent.class,
 				response -> response.getAuthor().equals(author) && response.getChannel() == channel,
 				response -> {
+					String message = response.getMessage().getContentRaw();
 					if(configurable.configType == Configurable.ConfigType.NUMBER) {
 						try {
-							int value = Integer.parseInt(response.getMessage().getContentRaw());
+							int value = Integer.parseInt(message);
 							if(configurable == Configurable.MAX_PLAYERS && (value < 1 || value > 120)) {
 								channel.sendMessage("Number must be between 1 and 120").queue();
 								promptValue();
@@ -92,32 +93,33 @@ public class ConfigThread extends Thread {
 							return;
 						}
 					} else if(configurable.configType == Configurable.ConfigType.SNOWFLAKE) {
-						if(response.getMessage().getContentRaw().equalsIgnoreCase("none")) {
+						if(message.equalsIgnoreCase("none")) {
 							Config.INSTANCE.set(configurable, "0");
 							Config.INSTANCE.save();
 							channel.sendMessage("Cleared " + configurable.displayName).queue();
 							return;
 						} else {
 							try {
-								Long.parseLong(response.getMessage().getContentRaw());
+								Long.parseLong(message);
 							} catch(Exception ignored) {
 								channel.sendMessage("Invalid number").queue();
 								promptValue();
 								return;
 							}
 						}
-					} else if(configurable.configType == Configurable.ConfigType.STRING) {
-						if(response.getMessage().getContentRaw().equalsIgnoreCase("none")) {
+					} else if(configurable.configType == Configurable.ConfigType.STRING || configurable.configType == Configurable.ConfigType.STRING_LOWER) {
+						if(message.equalsIgnoreCase("none")) {
 							Config.INSTANCE.set(configurable, "");
 							Config.INSTANCE.save();
 							channel.sendMessage("Cleared " + configurable.displayName).queue();
 							return;
 						}
 					}
-					Config.INSTANCE.set(configurable, response.getMessage().getContentRaw());
+					if(configurable.configType == Configurable.ConfigType.STRING_LOWER) message = message.toLowerCase();
+					Config.INSTANCE.set(configurable, message);
 					Config.INSTANCE.save();
 					if(configurable == Configurable.MAX_PLAYERS) {
-						channel.sendMessage("Now " + KOSDisplay.createCurrentlyTracking()).queue();
+						channel.sendMessage("Now " + DisplayManager.createCurrentlyTracking()).queue();
 					} else {
 						channel.sendMessage("Updated " + configurable.displayName + " to " + Config.INSTANCE.get(configurable)).queue();
 					}

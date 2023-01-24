@@ -1,9 +1,13 @@
-package dev.kyro.despair.controllers;
+package dev.kyro.despair.firestore;
 
 import com.google.cloud.firestore.annotation.Exclude;
 import dev.kyro.despair.Despair;
 import dev.kyro.despair.enums.Configurable;
 import dev.kyro.despair.misc.Variables;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Config {
 	@Exclude
@@ -16,26 +20,17 @@ public class Config {
 	public String PREFIX = ".";
 	public String API_KEY = "";
 	public int MAX_PLAYERS = 20;
+	public String RAW_TRUCE_CATEGORIES = "";
 	public long GUILD_ID;
-	public long DISPLAY_CHANNEL_ID;
-	public long DISPLAY_MESSAGE_ID;
+	public long KOS_DISPLAY_CHANNEL_ID;
+	public long KOS_DISPLAY_MESSAGE_ID;
+	public long TRUCE_DISPLAY_CHANNEL_ID;
+	public long TRUCE_DISPLAY_MESSAGE_ID;
 	public long MEMBER_ROLE_ID;
 	public long ADMIN_ROLE_ID;
 
 	public Config() {
 		INSTANCE = this;
-	}
-
-	public Config(String PREFIX, String API_KEY, int MAX_PLAYERS, long GUILD_ID, long DISPLAY_CHANNEL_ID,
-				  long DISPLAY_MESSAGE_ID, long MEMBER_ROLE_ID, long ADMIN_ROLE_ID) {
-		this.PREFIX = PREFIX;
-		this.API_KEY = API_KEY;
-		this.GUILD_ID = GUILD_ID;
-		this.MAX_PLAYERS = MAX_PLAYERS;
-		this.DISPLAY_CHANNEL_ID = DISPLAY_CHANNEL_ID;
-		this.DISPLAY_MESSAGE_ID = DISPLAY_MESSAGE_ID;
-		this.MEMBER_ROLE_ID = MEMBER_ROLE_ID;
-		this.ADMIN_ROLE_ID = ADMIN_ROLE_ID;
 	}
 
 	@Exclude
@@ -51,14 +46,23 @@ public class Config {
 			case MAX_PLAYERS:
 				MAX_PLAYERS = Integer.parseInt(value);
 				return;
+			case TRUCE_CATEGORIES:
+				RAW_TRUCE_CATEGORIES = value;
+				return;
 			case GUILD_ID:
 				GUILD_ID = Long.parseLong(value);
 				return;
-			case DISPLAY_CHANNEL_ID:
-				DISPLAY_CHANNEL_ID = Long.parseLong(value);
+			case KOS_DISPLAY_CHANNEL_ID:
+				KOS_DISPLAY_CHANNEL_ID = Long.parseLong(value);
 				return;
-			case DISPLAY_MESSAGE_ID:
-				DISPLAY_MESSAGE_ID = Long.parseLong(value);
+			case KOS_DISPLAY_MESSAGE_ID:
+				KOS_DISPLAY_MESSAGE_ID = Long.parseLong(value);
+				return;
+			case TRUCE_DISPLAY_CHANNEL_ID:
+				TRUCE_DISPLAY_CHANNEL_ID = Long.parseLong(value);
+				return;
+			case TRUCE_DISPLAY_MESSAGE_ID:
+				TRUCE_DISPLAY_MESSAGE_ID = Long.parseLong(value);
 				return;
 			case MEMBER_ROLE_ID:
 				MEMBER_ROLE_ID = Long.parseLong(value);
@@ -78,18 +82,29 @@ public class Config {
 				return API_KEY;
 			case MAX_PLAYERS:
 				return MAX_PLAYERS + "";
+			case TRUCE_CATEGORIES:
+				return RAW_TRUCE_CATEGORIES;
 			case GUILD_ID:
 				return GUILD_ID + "";
-			case DISPLAY_CHANNEL_ID:
-				return DISPLAY_CHANNEL_ID + "";
-			case DISPLAY_MESSAGE_ID:
-				return DISPLAY_MESSAGE_ID + "";
+			case KOS_DISPLAY_CHANNEL_ID:
+				return KOS_DISPLAY_CHANNEL_ID + "";
+			case KOS_DISPLAY_MESSAGE_ID:
+				return KOS_DISPLAY_MESSAGE_ID + "";
+			case TRUCE_DISPLAY_CHANNEL_ID:
+				return TRUCE_DISPLAY_CHANNEL_ID + "";
+			case TRUCE_DISPLAY_MESSAGE_ID:
+				return TRUCE_DISPLAY_MESSAGE_ID + "";
 			case MEMBER_ROLE_ID:
 				return MEMBER_ROLE_ID + "";
 			case ADMIN_ROLE_ID:
 				return ADMIN_ROLE_ID + "";
 		}
 		return null;
+	}
+
+	public List<String> getTruceListCategories() {
+		if(RAW_TRUCE_CATEGORIES.isEmpty()) return new ArrayList<>();
+		return Arrays.asList(RAW_TRUCE_CATEGORIES.split(","));
 	}
 
 	@Exclude

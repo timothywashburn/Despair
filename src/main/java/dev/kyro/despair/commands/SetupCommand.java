@@ -1,8 +1,8 @@
 package dev.kyro.despair.commands;
 
-import dev.kyro.despair.controllers.Config;
+import dev.kyro.despair.firestore.Config;
 import dev.kyro.despair.controllers.DiscordCommand;
-import dev.kyro.despair.controllers.KOSDisplay;
+import dev.kyro.despair.controllers.DisplayManager;
 import dev.kyro.despair.enums.Configurable;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -24,13 +24,13 @@ public class SetupCommand extends DiscordCommand {
 	@Override
 	public void execute(MessageReceivedEvent event, List<String> args) {
 
-		boolean isAdmin = Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR) || event.getMember().isOwner();
+		boolean hasPermission = Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR) || event.getMember().isOwner();
 		for(Role role : event.getMember().getRoles()) {
 			if(role.getIdLong() != Config.INSTANCE.ADMIN_ROLE_ID) continue;
-			isAdmin = true;
+			hasPermission = true;
 			break;
 		}
-		if(!isAdmin) {
+		if(!hasPermission) {
 			event.getChannel().sendMessage("You need to have administrative access to do this").queue();
 			return;
 		}
@@ -51,11 +51,20 @@ public class SetupCommand extends DiscordCommand {
 		event.getChannel().sendMessage("Setting up bot... Please stand by").queue();
 		Guild guild = event.getGuild();
 		Config.INSTANCE.set(Configurable.GUILD_ID, guild.getId());
+
 		guild.createCategory("KOS").queue(category -> {
-			guild.createTextChannel("kos-display", category).queue(displayChannel -> {
-				Config.INSTANCE.set(Configurable.DISPLAY_CHANNEL_ID, displayChannel.getId());
-				displayChannel.sendMessage(KOSDisplay.createKOSMessage().replace(" ||@everyone||", "")).queue(displayMessage -> {
-					Config.INSTANCE.set(Configurable.DISPLAY_MESSAGE_ID, displayMessage.getId());
+			guild.createTextChannel("kos-list", category).queue(displayChannel -> {
+				Config.INSTANCE.set(Configurable.KOS_DISPLAY_CHANNEL_ID, displayChannel.getId());
+				displayChannel.sendMessage(DisplayManager.createKOSMessage().replace(" ||@everyone||", "")).queue(displayMessage -> {
+					Config.INSTANCE.set(Configurable.KOS_DISPLAY_MESSAGE_ID, displayMessage.getId());
+					Config.INSTANCE.save();
+					displayMessage.createThreadChannel("Notifications").queue();
+				});
+			});
+			guild.createTextChannel("truce-list", category).queue(displayChannel -> {
+				Config.INSTANCE.set(Configurable.TRUCE_DISPLAY_CHANNEL_ID, displayChannel.getId());
+				displayChannel.sendMessage(DisplayManager.createTruceMessage().replace(" ||@everyone||", "")).queue(displayMessage -> {
+					Config.INSTANCE.set(Configurable.TRUCE_DISPLAY_MESSAGE_ID, displayMessage.getId());
 					Config.INSTANCE.save();
 					displayMessage.createThreadChannel("Notifications").queue();
 				});

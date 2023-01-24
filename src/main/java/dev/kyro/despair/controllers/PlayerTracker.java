@@ -3,6 +3,9 @@ package dev.kyro.despair.controllers;
 import dev.kyro.despair.Despair;
 import dev.kyro.despair.exceptions.InvalidAPIKeyException;
 import dev.kyro.despair.exceptions.NoAPIKeyException;
+import dev.kyro.despair.firestore.Config;
+import dev.kyro.despair.firestore.KOS;
+import dev.kyro.despair.firestore.Users;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.ThreadChannel;
@@ -82,12 +85,12 @@ public class PlayerTracker extends Thread {
 				if(guild != null) {
 
 //					Display channel check
-					TextChannel displayChannel = guild.getTextChannelById(Config.INSTANCE.DISPLAY_CHANNEL_ID);
+					TextChannel displayChannel = guild.getTextChannelById(Config.INSTANCE.KOS_DISPLAY_CHANNEL_ID);
 					if(displayChannel != null) {
 
 //						Thread check
 						for(ThreadChannel threadChannel : displayChannel.getThreadChannels()) {
-							if(threadChannel.getIdLong() != Config.INSTANCE.DISPLAY_MESSAGE_ID) continue;
+							if(threadChannel.getIdLong() != Config.INSTANCE.KOS_DISPLAY_MESSAGE_ID) continue;
 							String pingString = "";
 							for(Users.DiscordUser discordUser : Users.INSTANCE.getUsersWithTags(hypixelPlayer, kosPlayer.tags)) {
 								pingString += " <@" + discordUser.id + ">";

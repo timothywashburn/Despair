@@ -1,9 +1,9 @@
 package dev.kyro.despair.commands;
 
-import dev.kyro.despair.controllers.Config;
+import dev.kyro.despair.firestore.Config;
 import dev.kyro.despair.controllers.DiscordCommand;
-import dev.kyro.despair.controllers.KOS;
-import dev.kyro.despair.controllers.Users;
+import dev.kyro.despair.firestore.KOS;
+import dev.kyro.despair.firestore.Users;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;

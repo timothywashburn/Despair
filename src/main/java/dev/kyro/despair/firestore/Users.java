@@ -1,7 +1,9 @@
-package dev.kyro.despair.controllers;
+package dev.kyro.despair.firestore;
 
 import com.google.cloud.firestore.annotation.Exclude;
 import dev.kyro.despair.Despair;
+import dev.kyro.despair.controllers.HypixelPlayer;
+import dev.kyro.despair.controllers.PlayerTracker;
 import dev.kyro.despair.misc.Variables;
 
 import java.util.ArrayList;

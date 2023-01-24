@@ -1,6 +1,6 @@
 package dev.kyro.despair.commands;
 
-import dev.kyro.despair.controllers.Config;
+import dev.kyro.despair.firestore.Config;
 import dev.kyro.despair.controllers.DiscordCommand;
 import dev.kyro.despair.threads.ConfigThread;
 import net.dv8tion.jda.api.Permission;

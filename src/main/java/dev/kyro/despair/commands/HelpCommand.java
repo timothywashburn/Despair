@@ -1,6 +1,6 @@
 package dev.kyro.despair.commands;
 
-import dev.kyro.despair.controllers.Config;
+import dev.kyro.despair.firestore.Config;
 import dev.kyro.despair.controllers.DiscordCommand;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Role;
@@ -18,13 +18,13 @@ public class HelpCommand extends DiscordCommand {
 	@Override
 	public void execute(MessageReceivedEvent event, List<String> args) {
 
-		boolean isAdmin = Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR) || event.getMember().isOwner();
+		boolean hasPermission = Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR) || event.getMember().isOwner();
 		for(Role role : event.getMember().getRoles()) {
 			if(role.getIdLong() != Config.INSTANCE.MEMBER_ROLE_ID) continue;
-			isAdmin = true;
+			hasPermission = true;
 			break;
 		}
-		if(!isAdmin) {
+		if(!hasPermission) {
 			event.getChannel().sendMessage("You need to have member access to do this").queue();
 			return;
 		}

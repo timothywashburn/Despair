@@ -44,7 +44,7 @@ public class DiscordManager extends Thread implements EventListener {
 		System.out.println("Discord bot enabled...");
 
 		new PlayerTracker().start();
-		new KOSDisplay().start();
+		new DisplayManager().start();
 	}
 
 	public static void registerCommand(DiscordCommand command) {

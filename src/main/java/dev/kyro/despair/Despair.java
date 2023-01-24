@@ -7,6 +7,9 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
 import dev.kyro.despair.commands.*;
 import dev.kyro.despair.controllers.*;
+import dev.kyro.despair.firestore.Config;
+import dev.kyro.despair.firestore.KOS;
+import dev.kyro.despair.firestore.Users;
 import dev.kyro.despair.misc.FileResourcesUtils;
 import dev.kyro.despair.misc.Variables;
 import org.apache.log4j.BasicConfigurator;
@@ -15,6 +18,7 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.ZoneId;
 import java.util.concurrent.ExecutionException;
 
 public class Despair {
@@ -23,7 +27,8 @@ public class Despair {
 	public static Users USERS;
 	public static Config CONFIG;
 
-	public static long START_TIME = System.currentTimeMillis();
+	public static final long START_TIME = System.currentTimeMillis();
+	public static final ZoneId TIME_ZONE = ZoneId.of("America/New_York");
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
@@ -77,6 +82,7 @@ public class Despair {
 		DiscordManager.registerCommand(new HelpCommand());
 		DiscordManager.registerCommand(new PingCommand());
 		DiscordManager.registerCommand(new KOSCommand());
+		DiscordManager.registerCommand(new TruceCommand());
 		DiscordManager.registerCommand(new ConfigCommand());
 		DiscordManager.registerCommand(new SetupCommand());
 		DiscordManager.registerCommand(new NotifyCommand());

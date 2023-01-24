@@ -1,5 +1,6 @@
 package dev.kyro.despair.controllers;
 
+import dev.kyro.despair.firestore.Config;
 import dev.kyro.despair.misc.FileResourcesUtils;
 
 import java.io.File;
