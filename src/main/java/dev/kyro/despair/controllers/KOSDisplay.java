@@ -1,10 +1,12 @@
 package dev.kyro.despair.controllers;
 
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class KOSDisplay extends Thread {
 
@@ -13,7 +15,7 @@ public class KOSDisplay extends Thread {
 		while(true) {
 
 			Guild guild = DiscordManager.JDA.getGuildById(Config.INSTANCE.GUILD_ID);
-			if(guild == null) {
+			if(guild == null || KOS.INSTANCE.kosList.isEmpty()) {
 				sleepThread();
 				continue;
 			}
@@ -24,24 +26,9 @@ public class KOSDisplay extends Thread {
 				continue;
 			}
 
-			if(KOS.INSTANCE.kosList.isEmpty()) {
-				displayChannel.retrieveMessageById(Config.INSTANCE.DISPLAY_MESSAGE_ID).queue((message) -> {
-					message.editMessage("No players on KOS").queue();
-				}, failure -> {});
-				sleepThread();
-				continue;
-			}
-
 			String display = "DESPAIR KOS BOT ||@everyone||";
 			String online = "\n\nONLINE";
 			String offline = "\n\nOFFLINE";
-
-			int onlinePlayerCount = 0; int offlinePlayerCount = 0;
-			for(KOS.KOSPlayer player : KOS.INSTANCE.kosList) {
-				if(player.hypixelPlayer.isOnline) onlinePlayerCount++; else offlinePlayerCount++;
-			}
-			online += " (" + onlinePlayerCount + "/" + KOS.INSTANCE.kosList.size() + ")";
-			offline += " (" + offlinePlayerCount + "/" + KOS.INSTANCE.kosList.size() + ")";
 
 			for(KOS.KOSPlayer player : KOS.INSTANCE.kosList) {
 				if(player.hypixelPlayer.lastLogin == 0) continue;
