@@ -58,7 +58,8 @@ public class PlayerTracker extends Thread {
 					return;
 				}
 				if(requestData == null) {
-					String pattern = "HH:mm:ss"; SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+					String pattern = "HH:mm:ss";
+					SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
 					System.out.println(dateFormat.format(new Date()) + " Error fetching data for uuid: " + hypixelPlayer.UUID + " name: " + hypixelPlayer.name);
 					if(!hypixelPlayer.recentKills.isEmpty()) hypixelPlayer.recentKills.remove(0);
 
@@ -126,7 +127,7 @@ public class PlayerTracker extends Thread {
 	}
 
 	public void sleepThread() {
-		int dir = 500 / 1;
+		int dir = 500;
 		try {
 			Thread.sleep(dir);
 		} catch(InterruptedException e) {

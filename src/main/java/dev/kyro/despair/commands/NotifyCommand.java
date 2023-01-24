@@ -1,6 +1,9 @@
 package dev.kyro.despair.commands;
 
-import dev.kyro.despair.controllers.*;
+import dev.kyro.despair.controllers.Config;
+import dev.kyro.despair.controllers.DiscordCommand;
+import dev.kyro.despair.controllers.KOS;
+import dev.kyro.despair.controllers.Users;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -11,6 +14,7 @@ import java.util.Objects;
 
 public class NotifyCommand extends DiscordCommand {
 	public static List<String> specialTags = new ArrayList<>();
+
 	static {
 		specialTags.add("all");
 		specialTags.add("uber");

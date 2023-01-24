@@ -78,7 +78,7 @@ public class DiscordManager extends Thread implements EventListener {
 	@Override
 	public void onEvent(@NotNull GenericEvent event) {
 
-		if (event instanceof ReadyEvent)
+		if(event instanceof ReadyEvent)
 			System.out.println("API is ready!");
 
 		if(event instanceof MessageReceivedEvent)

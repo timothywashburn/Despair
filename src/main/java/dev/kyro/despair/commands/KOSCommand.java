@@ -51,7 +51,8 @@ public class KOSCommand extends DiscordCommand {
 				return;
 			}
 			String playerIdentifier = args.get(1);
-			JSONObject requestData; HypixelPlayer hypixelPlayer;
+			JSONObject requestData;
+			HypixelPlayer hypixelPlayer;
 			try {
 				if(Misc.isUUID(playerIdentifier)) {
 					requestData = HypixelAPIManager.request(UUID.fromString(playerIdentifier));
@@ -91,7 +92,8 @@ public class KOSCommand extends DiscordCommand {
 			String playerIdentifier = args.get(1);
 			KOS.KOSPlayer removePlayer = null;
 			for(KOS.KOSPlayer kosPlayer : KOS.INSTANCE.kosList) {
-				if(!kosPlayer.uuid.equals(playerIdentifier) && !kosPlayer.name.equalsIgnoreCase(playerIdentifier)) continue;
+				if(!kosPlayer.uuid.equals(playerIdentifier) && !kosPlayer.name.equalsIgnoreCase(playerIdentifier))
+					continue;
 				removePlayer = kosPlayer;
 				break;
 			}

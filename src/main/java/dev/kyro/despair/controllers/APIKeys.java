@@ -1,6 +1,5 @@
 package dev.kyro.despair.controllers;
 
-import dev.kyro.despair.enums.Configurable;
 import dev.kyro.despair.misc.FileResourcesUtils;
 
 import java.io.File;

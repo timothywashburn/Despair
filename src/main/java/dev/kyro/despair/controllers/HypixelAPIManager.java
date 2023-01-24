@@ -9,13 +9,11 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
-import org.omg.CORBA.DynAnyPackage.Invalid;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.MissingResourceException;
 import java.util.UUID;
 
 public class HypixelAPIManager {
@@ -36,7 +34,8 @@ public class HypixelAPIManager {
 
 			JSONObject playerObj = new JSONObject(result);
 			if(!playerObj.getBoolean("success")) {
-				if(playerObj.getString("cause").equals("You have already looked up this name recently")) throw new LookedUpNameRecentlyException();
+				if(playerObj.getString("cause").equals("You have already looked up this name recently"))
+					throw new LookedUpNameRecentlyException();
 				if(playerObj.getString("cause").equals("Invalid API key")) throw new InvalidAPIKeyException();
 				return null;
 			}
@@ -81,15 +80,15 @@ public class HypixelAPIManager {
 
 		String line;
 		try {
-			while ((line = reader.readLine()) != null) {
+			while((line = reader.readLine()) != null) {
 				sb.append(line).append("\n");
 			}
-		} catch (IOException e) {
+		} catch(IOException e) {
 			e.printStackTrace();
 		} finally {
 			try {
 				is.close();
-			} catch (IOException e) {
+			} catch(IOException e) {
 				e.printStackTrace();
 			}
 		}

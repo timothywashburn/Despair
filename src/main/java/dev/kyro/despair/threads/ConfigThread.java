@@ -125,5 +125,5 @@ public class ConfigThread extends Thread {
 				60, TimeUnit.SECONDS, this::timeExpired);
 	}
 
-	public void timeExpired() { }
+	public void timeExpired() {}
 }

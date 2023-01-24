@@ -8,10 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Users {
-	@Exclude public static Users INSTANCE;
+	@Exclude
+	public static Users INSTANCE;
 	public List<DiscordUser> discordUserList = new ArrayList<>();
-	@Exclude public boolean onSaveCooldown = false;
-	@Exclude public boolean saveQueued = false;
+	@Exclude
+	public boolean onSaveCooldown = false;
+	@Exclude
+	public boolean saveQueued = false;
 
 	public Users() {
 		INSTANCE = this;
@@ -26,7 +29,8 @@ public class Users {
 	public List<DiscordUser> getUsersWithTags(HypixelPlayer hypixelPlayer, List<String> tags) {
 		List<String> newTags = new ArrayList<>(tags);
 		newTags.add(hypixelPlayer.UUID.toString());
-		if(hypixelPlayer.megastreak.equals("Uberstreak") && PlayerTracker.isPlayerStreaking(hypixelPlayer)) newTags.add("uber");
+		if(hypixelPlayer.megastreak.equals("Uberstreak") && PlayerTracker.isPlayerStreaking(hypixelPlayer))
+			newTags.add("uber");
 		return getUsersWithTags(newTags);
 	}
 
@@ -68,7 +72,7 @@ public class Users {
 				save();
 			}).start();
 		}
-		if(!saveQueued && !onSaveCooldown){
+		if(!saveQueued && !onSaveCooldown) {
 			Despair.FIRESTORE.collection(Variables.COLLECTION).document("users").set(this);
 			onSaveCooldown = true;
 			new Thread(() -> {
@@ -86,7 +90,7 @@ public class Users {
 		public long id;
 		public List<String> tags = new ArrayList<>();
 
-		public DiscordUser() { }
+		public DiscordUser() {}
 
 		public DiscordUser(long id) {
 			this.id = id;

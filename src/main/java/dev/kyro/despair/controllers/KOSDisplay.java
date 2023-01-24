@@ -46,9 +46,11 @@ public class KOSDisplay extends Thread {
 		String online = "\n\nONLINE";
 		String offline = "\n\nOFFLINE";
 
-		int onlinePlayerCount = 0; int offlinePlayerCount = 0;
+		int onlinePlayerCount = 0;
+		int offlinePlayerCount = 0;
 		for(KOS.KOSPlayer player : KOS.INSTANCE.kosList) {
-			if(player.hypixelPlayer.isOnline) onlinePlayerCount++; else offlinePlayerCount++;
+			if(player.hypixelPlayer.isOnline) onlinePlayerCount++;
+			else offlinePlayerCount++;
 		}
 		online += " (" + onlinePlayerCount + "/" + KOS.INSTANCE.kosList.size() + ")";
 		offline += " (" + offlinePlayerCount + "/" + KOS.INSTANCE.kosList.size() + ")";
@@ -85,7 +87,8 @@ public class KOSDisplay extends Thread {
 		display += online;
 		display += offline;
 
-		String pattern = "HH:mm:ss"; SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+		String pattern = "HH:mm:ss";
+		SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
 		display += "\n\n" + dateFormat.format(new Date().getTime() + 3 * 60 * 60 * 1000) + " EST";
 
 		return display;

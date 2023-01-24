@@ -70,7 +70,8 @@ public class HypixelPlayer {
 		recentKills.add(kills);
 		if(recentKills.size() > Math.round(120.0 / PlayerTracker.getMaxPlayers() + 1)) recentKills.remove(0);
 		apiDisabledKillTracker.add(kills);
-		if(apiDisabledKillTracker.size() > Math.round(600.0 / PlayerTracker.getMaxPlayers() + 1)) apiDisabledKillTracker.remove(0);
+		if(apiDisabledKillTracker.size() > Math.round(600.0 / PlayerTracker.getMaxPlayers() + 1))
+			apiDisabledKillTracker.remove(0);
 	}
 
 	public JSONObject getPlayerObj() {

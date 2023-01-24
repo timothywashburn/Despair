@@ -6,9 +6,12 @@ import dev.kyro.despair.enums.Configurable;
 import dev.kyro.despair.misc.Variables;
 
 public class Config {
-	@Exclude public static Config INSTANCE;
-	@Exclude public boolean onSaveCooldown = false;
-	@Exclude public boolean saveQueued = false;
+	@Exclude
+	public static Config INSTANCE;
+	@Exclude
+	public boolean onSaveCooldown = false;
+	@Exclude
+	public boolean saveQueued = false;
 
 	public String PREFIX = ".";
 	public String API_KEY = "";
@@ -43,7 +46,7 @@ public class Config {
 				PREFIX = value;
 				return;
 			case API_KEY:
-				API_KEY =  value;
+				API_KEY = value;
 				return;
 			case MAX_PLAYERS:
 				MAX_PLAYERS = Integer.parseInt(value);
@@ -103,7 +106,7 @@ public class Config {
 				save();
 			}).start();
 		}
-		if(!saveQueued && !onSaveCooldown){
+		if(!saveQueued && !onSaveCooldown) {
 			Despair.FIRESTORE.collection(Variables.COLLECTION).document("config").set(this);
 			onSaveCooldown = true;
 			new Thread(() -> {
