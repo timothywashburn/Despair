@@ -8,6 +8,18 @@ import java.util.regex.Pattern;
 public class Misc {
 	private static final Pattern periodPattern = Pattern.compile("(\\d+)([mhdw])");
 
+	public static String obfuscateUUID(UUID uuid) {
+		String uuidString = uuid.toString();
+		Pattern pattern = Pattern.compile("^([\\w\\d]+)-([\\w\\d-]+)-([\\w\\d]+)$");
+		Matcher matcher = pattern.matcher(uuidString);
+		if (matcher.find()) {
+			String firstPart = matcher.group(1);
+			String lastPart = matcher.group(3);
+			return firstPart + "..." + lastPart;
+		}
+		return uuidString;
+	}
+
 	public static Duration parseDuration(String durationString) throws Exception {
 		durationString = durationString.toLowerCase().replaceAll(" ", "");
 		Matcher matcher = periodPattern.matcher(durationString);

@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class ConfigThread extends Thread {
@@ -45,6 +46,9 @@ public class ConfigThread extends Thread {
 		for(int i = 0; i < Configurable.getConfigurables().length; i++) {
 			Configurable configurable = Configurable.getConfigurables()[i];
 			String currentValue = Config.INSTANCE.get(configurable);
+			try {
+				currentValue = Misc.obfuscateUUID(UUID.fromString(currentValue));
+			} catch(IllegalArgumentException ignored) {}
 			embedBuilder.addField((i + 1) + ". " + configurable.displayName, currentValue.equals("0") ? "None" : currentValue, true);
 		}
 

@@ -102,6 +102,7 @@ public class Config {
 		return null;
 	}
 
+	@Exclude
 	public List<String> getTruceListCategories() {
 		if(RAW_TRUCE_CATEGORIES.isEmpty()) return new ArrayList<>();
 		return Arrays.asList(RAW_TRUCE_CATEGORIES.split(","));
