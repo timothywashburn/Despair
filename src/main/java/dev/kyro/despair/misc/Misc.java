@@ -1,8 +1,15 @@
 package dev.kyro.despair.misc;
 
+import java.time.Duration;
 import java.util.UUID;
 
 public class Misc {
+	public static String humanReadableFormat(Duration duration) {
+		return duration.toString()
+				.substring(2)
+				.replaceAll("(\\d[HMS])(?!$)", "$1 ")
+				.toLowerCase();
+	}
 
 	public static boolean isUUID(String uuid) {
 		try {

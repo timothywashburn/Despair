@@ -44,7 +44,7 @@ public class DiscordManager extends Thread implements EventListener {
 		System.out.println("Discord bot enabled...");
 
 		new PlayerTracker().start();
-		new KOSDisplay().start();
+		new DisplayManager().start();
 	}
 
 	public static void registerCommand(DiscordCommand command) {
@@ -78,7 +78,7 @@ public class DiscordManager extends Thread implements EventListener {
 	@Override
 	public void onEvent(@NotNull GenericEvent event) {
 
-		if (event instanceof ReadyEvent)
+		if(event instanceof ReadyEvent)
 			System.out.println("API is ready!");
 
 		if(event instanceof MessageReceivedEvent)

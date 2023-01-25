@@ -5,20 +5,24 @@ import com.google.type.Decimal;
 import dev.kyro.despair.Despair;
 import dev.kyro.despair.exceptions.InvalidAPIKeyException;
 import dev.kyro.despair.exceptions.NoAPIKeyException;
+import dev.kyro.despair.firestore.Config;
+import dev.kyro.despair.firestore.KOS;
+import dev.kyro.despair.firestore.Users;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.ThreadChannel;
 import org.json.JSONObject;
 
 import java.sql.Array;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
 
 public class PlayerTracker extends Thread {
 	public static int count = 0;
 	public static ArrayList<KOS.KOSPlayer> playerIteration = new ArrayList<>();
 	public static long lastIteration;
+	public static Map<UUID, Long> notifyCooldown = new HashMap<>();
 
 	@Override
 	public void run() {
@@ -29,8 +33,8 @@ public class PlayerTracker extends Thread {
 				continue;
 			}
 
-			if(playerIteration.isEmpty() || count == playerIteration.size()) {
-				int playersExtra = getMaxPlayers() - count;
+			if(playerIteration.isEmpty() || count == playerIteration.size() || count == getMaxPlayers()) {
+				int playersExtra = Math.max(getMaxPlayers() - count, 0);
 				count = 0;
 				playerIteration.clear();
 				playerIteration.addAll(Despair.KOS.kosList);
@@ -60,7 +64,8 @@ public class PlayerTracker extends Thread {
 					return;
 				}
 				if(requestData == null) {
-					String pattern = "HH:mm:ss"; SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+					String pattern = "HH:mm:ss";
+					SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
 					System.out.println(dateFormat.format(new Date()) + " Error fetching data for uuid: " + hypixelPlayer.UUID + " name: " + hypixelPlayer.name);
 					if(!hypixelPlayer.recentKills.isEmpty()) hypixelPlayer.recentKills.remove(0);
 
@@ -68,14 +73,47 @@ public class PlayerTracker extends Thread {
 				}
 
 				boolean wasOnline = hypixelPlayer.isOnline;
+				boolean wasStreaking = hypixelPlayer.getRecentKills() != 0;
 				hypixelPlayer.update(requestData);
+				if(!hypixelPlayer.name.equals(kosPlayer.name)) {
+					kosPlayer.name = hypixelPlayer.name;
+					KOS.INSTANCE.save();
+				}
 
+//				Check notify cooldown
+				boolean canNotify = notifyCooldown.getOrDefault(hypixelPlayer.UUID, 0L) + 60_500 < System.currentTimeMillis();
+
+//				Guild check
 				Guild guild = DiscordManager.JDA.getGuildById(Config.INSTANCE.GUILD_ID);
 				if(guild != null) {
-					TextChannel notifyChannel = guild.getTextChannelById(Config.INSTANCE.NOTIFY_CHANNEL_ID);
-					if(notifyChannel != null) {
-						if(!wasOnline && hypixelPlayer.isOnline) notifyChannel.sendMessage("Login: `" + hypixelPlayer.name + "`").queue();
-						if(wasOnline && !hypixelPlayer.isOnline) notifyChannel.sendMessage("Logout: `" + hypixelPlayer.name + "`").queue();
+
+//					Display channel check
+					TextChannel displayChannel = guild.getTextChannelById(Config.INSTANCE.KOS_DISPLAY_CHANNEL_ID);
+					if(displayChannel != null) {
+
+//						Thread check
+						for(ThreadChannel threadChannel : displayChannel.getThreadChannels()) {
+							if(threadChannel.getIdLong() != Config.INSTANCE.KOS_DISPLAY_MESSAGE_ID) continue;
+							String pingString = "";
+							for(Users.DiscordUser discordUser : Users.INSTANCE.getUsersWithTags(hypixelPlayer, kosPlayer.tags)) {
+								pingString += " <@" + discordUser.id + ">";
+							}
+
+							if(System.currentTimeMillis() - Despair.START_TIME - 500L > 1000L * PlayerTracker.getMaxPlayers()) {
+								if(!wasOnline && hypixelPlayer.isOnline)
+									threadChannel.sendMessage("Login: `" + hypixelPlayer.name + "`" + pingString).queue();
+								if(wasOnline && !hypixelPlayer.isOnline)
+									threadChannel.sendMessage("Logout: `" + hypixelPlayer.name + "`").queue();
+							}
+
+							if(isPlayerStreaking(hypixelPlayer)) {
+								if(canNotify) {
+									threadChannel.sendMessage("Streaking: `" + hypixelPlayer.name + "`" + pingString).queue();
+//									Put on notify cooldown
+									notifyCooldown.put(hypixelPlayer.UUID, System.currentTimeMillis());
+								}
+							}
+						}
 					}
 				}
 			}).start();
@@ -85,12 +123,17 @@ public class PlayerTracker extends Thread {
 		}
 	}
 
-	public int getMaxPlayers() {
-		return 20 * 1;
+	public static boolean isPlayerStreaking(HypixelPlayer hypixelPlayer) {
+		return hypixelPlayer.recentKills.size() > 2 && hypixelPlayer.recentKills.get(hypixelPlayer.recentKills.size() - 1) -
+				hypixelPlayer.recentKills.get(hypixelPlayer.recentKills.size() - 2) != 0;
+	}
+
+	public static int getMaxPlayers() {
+		return Config.INSTANCE.MAX_PLAYERS;
 	}
 
 	public void sleepThread() {
-		int dir = 500 / 1;
+		int dir = 500;
 		try {
 			Thread.sleep(dir);
 		} catch(InterruptedException e) {

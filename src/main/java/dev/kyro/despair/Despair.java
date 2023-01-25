@@ -10,20 +10,28 @@ import dev.kyro.despair.commands.PingCommand;
 import dev.kyro.despair.commands.ConfigCommand;
 import dev.kyro.despair.commands.SetupCommand;
 import dev.kyro.despair.controllers.*;
-import dev.kyro.despair.misc.Variables;
+import dev.kyro.despair.firestore.Config;
+import dev.kyro.despair.firestore.KOS;
+import dev.kyro.despair.firestore.Users;
 import dev.kyro.despair.misc.FileResourcesUtils;
+import dev.kyro.despair.misc.Variables;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.ZoneId;
 import java.util.concurrent.ExecutionException;
 
 public class Despair {
 	public static Firestore FIRESTORE;
 	public static KOS KOS;
+	public static Users USERS;
 	public static Config CONFIG;
+
+	public static final long START_TIME = System.currentTimeMillis();
+	public static final ZoneId TIME_ZONE = ZoneId.of("America/New_York");
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
@@ -49,12 +57,17 @@ public class Despair {
 				KOS = new KOS();
 				KOS.save();
 			}
+			if(!FIRESTORE.collection(Variables.COLLECTION).document("users").get().get().exists()) {
+				USERS = new Users();
+				USERS.save();
+			}
 			if(!FIRESTORE.collection(Variables.COLLECTION).document("config").get().get().exists()) {
 				CONFIG = new Config();
 				CONFIG.save();
 			}
 
 			KOS = FIRESTORE.collection(Variables.COLLECTION).document("kos").get().get().toObject(KOS.class);
+			USERS = FIRESTORE.collection(Variables.COLLECTION).document("users").get().get().toObject(Users.class);
 			CONFIG = FIRESTORE.collection(Variables.COLLECTION).document("config").get().get().toObject(Config.class);
 		} catch(InterruptedException | ExecutionException e) {
 			e.printStackTrace();
@@ -68,10 +81,13 @@ public class Despair {
 	}
 
 	public static void registerCommands() {
-
+		DiscordManager.registerCommand(new HelpCommand());
 		DiscordManager.registerCommand(new PingCommand());
 		DiscordManager.registerCommand(new KOSCommand());
+		DiscordManager.registerCommand(new KOSCommand());
+		DiscordManager.registerCommand(new TruceCommand());
 		DiscordManager.registerCommand(new ConfigCommand());
 		DiscordManager.registerCommand(new SetupCommand());
+		DiscordManager.registerCommand(new NotifyCommand());
 	}
 }
