@@ -1,7 +1,5 @@
 package dev.kyro.despair.controllers;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.type.Decimal;
 import dev.kyro.despair.Despair;
 import dev.kyro.despair.exceptions.InvalidAPIKeyException;
 import dev.kyro.despair.exceptions.NoAPIKeyException;
@@ -13,7 +11,6 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.ThreadChannel;
 import org.json.JSONObject;
 
-import java.sql.Array;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -84,7 +81,7 @@ public class PlayerTracker extends Thread {
 				boolean canNotify = notifyCooldown.getOrDefault(hypixelPlayer.UUID, 0L) + 60_500 < System.currentTimeMillis();
 
 //				Guild check
-				Guild guild = DiscordManager.JDA.getGuildById(Config.INSTANCE.GUILD_ID);
+				Guild guild = DiscordManager.getMainGuild();
 				if(guild != null) {
 
 //					Display channel check

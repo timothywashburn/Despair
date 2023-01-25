@@ -75,17 +75,5 @@ public class Despair {
 		APIKeys.updateAPIKeys();
 
 		new DiscordManager().start();
-		registerCommands();
-	}
-
-	public static void registerCommands() {
-		DiscordManager.registerCommand(new HelpCommand());
-		DiscordManager.registerCommand(new PingCommand());
-		DiscordManager.registerCommand(new KOSCommand());
-		DiscordManager.registerCommand(new KOSCommand());
-		DiscordManager.registerCommand(new TruceCommand());
-		DiscordManager.registerCommand(new ConfigCommand());
-		DiscordManager.registerCommand(new SetupCommand());
-		DiscordManager.registerCommand(new NotifyCommand());
 	}
 }

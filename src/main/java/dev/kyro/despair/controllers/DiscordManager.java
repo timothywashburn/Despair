@@ -2,12 +2,16 @@ package dev.kyro.despair.controllers;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import dev.kyro.despair.Despair;
+import dev.kyro.despair.commands.*;
+import dev.kyro.despair.firestore.Config;
 import dev.kyro.despair.misc.Variables;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -38,17 +42,48 @@ public class DiscordManager extends Thread implements EventListener {
 			BUILDER.addEventListeners(WAITER);
 			JDA = BUILDER.build();
 			JDA.awaitReady();
-		} catch(LoginException | InterruptedException e) {
-			e.printStackTrace();
+		} catch(LoginException | InterruptedException exception) {
+			exception.printStackTrace();
 		}
 		System.out.println("Discord bot enabled...");
 
 		new PlayerTracker().start();
 		new DisplayManager().start();
+
+//		getMainGuild().retrieveCommands().queue(currentCommands -> {
+//			for(Command currentCommand : currentCommands) getMainGuild().deleteCommandById(currentCommand.getId()).queue();
+//		});
+
+		registerCommands();
+		setupSlashCommands();
+	}
+
+	public static void registerCommands() {
+		registerCommand(new TestCommand());
+		registerCommand(new HelpCommand());
+		registerCommand(new PingCommand());
+		registerCommand(new KOSCommand());
+		registerCommand(new KOSCommand());
+		registerCommand(new TruceCommand());
+		registerCommand(new ConfigCommand());
+		registerCommand(new SetupCommand());
+		registerCommand(new NotifyCommand());
+	}
+
+	public static void setupSlashCommands() {
+		for(DiscordCommand command : commands) {
+			if(!(command instanceof SlashCommand)) continue;
+			SlashCommand slashCommand = (SlashCommand) command;
+
+			getMainGuild().upsertCommand(slashCommand.getCommandStructure()).queue();
+		}
+	}
+
+	public static Guild getMainGuild() {
+		return DiscordManager.JDA.getGuildById(Config.INSTANCE.GUILD_ID);
 	}
 
 	public static void registerCommand(DiscordCommand command) {
-
 		commands.add(command);
 	}
 
@@ -75,6 +110,16 @@ public class DiscordManager extends Thread implements EventListener {
 		}
 	}
 
+	public void onSlashCommand(SlashCommandInteractionEvent event) {
+		String command = event.getName();
+		for(DiscordCommand discordCommand : commands) {
+			if(!(discordCommand instanceof SlashCommand) || !discordCommand.command.equals(command)) continue;
+			SlashCommand slashCommand = (SlashCommand) discordCommand;
+			slashCommand.execute(event);
+			return;
+		}
+	}
+
 	@Override
 	public void onEvent(@NotNull GenericEvent event) {
 
@@ -83,5 +128,8 @@ public class DiscordManager extends Thread implements EventListener {
 
 		if(event instanceof MessageReceivedEvent)
 			onMessageReceived((MessageReceivedEvent) event);
+
+		if(event instanceof SlashCommandInteractionEvent)
+			onSlashCommand((SlashCommandInteractionEvent) event);
 	}
 }

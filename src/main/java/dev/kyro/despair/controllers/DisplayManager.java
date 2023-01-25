@@ -18,7 +18,7 @@ public class DisplayManager extends Thread {
 	public void run() {
 		while(true) {
 
-			Guild guild = DiscordManager.JDA.getGuildById(Config.INSTANCE.GUILD_ID);
+			Guild guild = DiscordManager.getMainGuild();
 			if(guild == null || KOS.INSTANCE.kosList.isEmpty()) {
 				sleepThread();
 				continue;
