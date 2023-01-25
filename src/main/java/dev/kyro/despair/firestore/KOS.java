@@ -3,13 +3,13 @@ package dev.kyro.despair.firestore;
 import com.google.cloud.firestore.annotation.Exclude;
 import dev.kyro.despair.Despair;
 import dev.kyro.despair.controllers.HypixelPlayer;
+import dev.kyro.despair.misc.Misc;
 import dev.kyro.despair.misc.Variables;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class KOS {
 	@Exclude
@@ -21,7 +21,7 @@ public class KOS {
 
 //	saveable
 	public List<KOSPlayer> kosList = new ArrayList<>();
-	public List<TrucePlayer> truceList = new ArrayList<>();
+	private List<TrucePlayer> truceList = new ArrayList<>();
 
 	public KOS() {
 		INSTANCE = this;
@@ -68,9 +68,14 @@ public class KOS {
 		return false;
 	}
 
+	public List<TrucePlayer> getTruceList() {
+		Collections.sort(truceList);
+		return truceList;
+	}
+
 	public List<TrucePlayer> getPlayersInCategory(String category) {
 		List<TrucePlayer> players = new ArrayList<>();
-		for(TrucePlayer trucePlayer : truceList) {
+		for(TrucePlayer trucePlayer : getTruceList()) {
 			if(category == null) {
 				if(!Config.INSTANCE.getTruceListCategories().contains(trucePlayer.category)) players.add(trucePlayer);
 				continue;
@@ -141,10 +146,10 @@ public class KOS {
 		}
 	}
 
-	public static class TrucePlayer {
+	public static class TrucePlayer implements Comparable<TrucePlayer> {
 		public String name;
 		public String uuid;
-		public Instant trucedUntil = Instant.now();
+		public Date trucedUntil;
 		public String category;
 		public List<String> altUUIDs = new ArrayList<>();
 
@@ -157,7 +162,7 @@ public class KOS {
 			this.name = name;
 			setUuid(uuid);
 			this.category = category;
-			extendTruce(truceDuration);
+			if(truceDuration != null) trucedUntil = new Date(new Date().getTime() + truceDuration.toMillis());
 		}
 
 		public void setUuid(String uuid) {
@@ -166,14 +171,26 @@ public class KOS {
 		}
 
 		public void extendTruce(Duration duration) {
-			trucedUntil = trucedUntil.plus(duration);
+			if(trucedUntil == null) throw new RuntimeException();
+			trucedUntil = new Date(trucedUntil.getTime() + duration.toMillis());
 		}
 
+		@Exclude
 		public String getTruceStatus() {
-			if(trucedUntil.isBefore(Instant.now())) return "EXPIRED";
-			Duration duration = Duration.between(trucedUntil, trucedUntil);
-//			TODO
-			return "";
+			if(trucedUntil == null) return "PERMANENT";
+			Duration duration = Duration.between(Instant.now(), trucedUntil.toInstant());
+			if(trucedUntil.toInstant().isBefore(Instant.now())) return "EXPIRED (" + Misc.humanReadableFormat(duration) + ")";
+			return Misc.humanReadableFormat(duration);
+		}
+
+		@Override
+		public int compareTo(@NotNull KOS.TrucePlayer otherPlayer) {
+			if(trucedUntil == null) {
+				if(otherPlayer.trucedUntil == null) return 0;
+				return 1;
+			}
+			if(otherPlayer.trucedUntil == null) return -1;
+			return trucedUntil.toInstant().isBefore(otherPlayer.trucedUntil.toInstant()) ? -1 : 1;
 		}
 	}
 }

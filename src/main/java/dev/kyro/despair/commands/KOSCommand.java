@@ -123,7 +123,7 @@ public class KOSCommand extends DiscordCommand {
 		} else if(subCommand.equals("list")) {
 			String message = "KOS PLAYERS";
 			for(KOS.KOSPlayer kosPlayer : KOS.INSTANCE.kosList) {
-				message += "\n> " + (kosPlayer.name != null ? kosPlayer.name : kosPlayer.uuid) + kosPlayer.getTagsAsString();
+				message += "\n> `" + (kosPlayer.name != null ? kosPlayer.name : kosPlayer.uuid) + "`" + kosPlayer.getTagsAsString();
 			}
 			event.getChannel().sendMessage(message).queue();
 		} else {

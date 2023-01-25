@@ -2,13 +2,53 @@ package dev.kyro.despair.misc;
 
 import java.time.Duration;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Misc {
+	private static final Pattern periodPattern = Pattern.compile("(\\d+)([mhdw])");
+
+	public static Duration parseDuration(String durationString) throws Exception {
+		durationString = durationString.toLowerCase().replaceAll(" ", "");
+		Matcher matcher = periodPattern.matcher(durationString);
+		Duration duration = Duration.ZERO;
+		while(matcher.find()) {
+			int num = Integer.parseInt(matcher.group(1));
+			String typ = matcher.group(2);
+			switch(typ) {
+				case "m":
+					duration = duration.plus(Duration.ofMinutes(num));
+					break;
+				case "h":
+					duration = duration.plus(Duration.ofHours(num));
+					break;
+				case "d":
+					duration = duration.plus(Duration.ofDays(num));
+					break;
+				case "w":
+					duration = duration.plus(Duration.ofDays(num).multipliedBy(7));
+			}
+		}
+		if(duration.equals(Duration.ZERO)) throw new Exception();
+		return duration;
+	}
+
 	public static String humanReadableFormat(Duration duration) {
-		return duration.toString()
-				.substring(2)
-				.replaceAll("(\\d[HMS])(?!$)", "$1 ")
-				.toLowerCase();
+		long millis = duration.toMillis();
+		long days = millis / (24 * 60 * 60 * 1000);
+		millis %= (24 * 60 * 60 * 1000);
+		long hours = millis / (60 * 60 * 1000);
+		millis %= (60 * 60 * 1000);
+		long minutes = millis / (60 * 1000);
+		millis %= (60 * 1000);
+		long seconds = millis / 1000;
+
+		String displayName = "";
+		if(days != 0) displayName += days + "d ";
+		if(hours != 0) displayName += hours + "h ";
+		if(minutes != 0) displayName += minutes + "m ";
+		if(seconds != 0) displayName += seconds + "s";
+		return displayName;
 	}
 
 	public static boolean isUUID(String uuid) {

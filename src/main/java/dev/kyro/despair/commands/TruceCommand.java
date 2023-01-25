@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.json.JSONObject;
 
 import java.time.Duration;
-import java.time.format.DateTimeParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -48,24 +48,29 @@ public class TruceCommand extends DiscordCommand {
 		if(subCommand.equals("add")) {
 			if(args.size() < 4) {
 				event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "truce add <uuid/name> <" +
-						String.join("/", Config.INSTANCE.getTruceListCategories()) + "> <duration>`").queue();
+						String.join("/", Config.INSTANCE.getTruceListCategories()) + "> <duration/perm>`").queue();
 				return;
 			}
 
 			String category = args.get(2).toLowerCase();
 			if(!Config.INSTANCE.getTruceListCategories().contains(category)) {
-				event.getChannel().sendMessage("Please input a valid category: " +
-						String.join(", ", Config.INSTANCE.getTruceListCategories()) + "> <duration>").queue();
+				event.getChannel().sendMessage("Not a valid category: " +
+						String.join(", ", Config.INSTANCE.getTruceListCategories()) + "").queue();
 				return;
 			}
 
-			String durationString = String.join(" ", args.subList(3, args.size()));
 			Duration duration;
-			try {
-				duration = Duration.parse(durationString);
-			} catch(DateTimeParseException exception) {
-				event.getChannel().sendMessage("Invalid time provided").queue();
-				return;
+			if(args.get(3).equalsIgnoreCase("perm") || args.get(3).equalsIgnoreCase("permanent")) {
+				duration = null;
+			} else {
+				String durationString = String.join(" ", args.subList(3, args.size()));
+				try {
+					duration = Misc.parseDuration(durationString);
+				} catch(Exception exception) {
+					exception.printStackTrace();
+					event.getChannel().sendMessage("Invalid time provided").queue();
+					return;
+				}
 			}
 
 			String playerIdentifier = args.get(1);
@@ -97,7 +102,11 @@ public class TruceCommand extends DiscordCommand {
 			KOS.TrucePlayer trucePlayer = new KOS.TrucePlayer(hypixelPlayer.name, hypixelPlayer.UUID.toString(), category, duration);
 			trucePlayer.hypixelPlayer = hypixelPlayer;
 			KOS.INSTANCE.addTrucePlayer(trucePlayer, true);
-			event.getChannel().sendMessage("Added `" + hypixelPlayer.name + "` to truce for " + Misc.humanReadableFormat(duration)).queue();
+			if(duration == null) {
+				event.getChannel().sendMessage("Permanently added `" + hypixelPlayer.name + "` to truce").queue();
+			} else {
+				event.getChannel().sendMessage("Added `" + hypixelPlayer.name + "` to truce for " + Misc.humanReadableFormat(duration)).queue();
+			}
 
 		} else if(subCommand.equals("extend")) {
 			if(args.size() < 3) {
@@ -107,7 +116,7 @@ public class TruceCommand extends DiscordCommand {
 
 			String playerIdentifier = args.get(1);
 			KOS.TrucePlayer extendPlayer = null;
-			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.truceList) {
+			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.getTruceList()) {
 				if(!trucePlayer.uuid.equals(playerIdentifier) && !trucePlayer.name.equalsIgnoreCase(playerIdentifier))
 					continue;
 				extendPlayer = trucePlayer;
@@ -122,18 +131,33 @@ public class TruceCommand extends DiscordCommand {
 				return;
 			}
 
-			String durationString = String.join(" ", args.subList(2, args.size()));
-			Duration duration;
-			try {
-				duration = Duration.parse(durationString);
-			} catch(DateTimeParseException exception) {
-				event.getChannel().sendMessage("Invalid time provided").queue();
+			if(extendPlayer.trucedUntil == null) {
+				event.getChannel().sendMessage("That player already has a permanent truce").queue();
 				return;
 			}
 
+			Duration duration;
+			if(args.get(2).equalsIgnoreCase("perm") || args.get(2).equalsIgnoreCase("permanent")) {
+				duration = null;
+			} else {
+				String durationString = String.join(" ", args.subList(2, args.size()));
+				try {
+					duration = Misc.parseDuration(durationString);
+				} catch(Exception exception) {
+					exception.printStackTrace();
+					event.getChannel().sendMessage("Invalid time provided").queue();
+					return;
+				}
+			}
+
+			if(extendPlayer.trucedUntil.getTime() < new Date().getTime()) extendPlayer.trucedUntil = new Date();
 			extendPlayer.extendTruce(duration);
-			Config.INSTANCE.save();
-			event.getChannel().sendMessage("Extended truce for `" + extendPlayer.name + "` by " + Misc.humanReadableFormat(duration)).queue();
+			KOS.INSTANCE.save();
+			if(duration == null) {
+				event.getChannel().sendMessage("Changed truce for `" + extendPlayer.name + "` to be permanent").queue();
+			} else {
+				event.getChannel().sendMessage("Extended truce for `" + extendPlayer.name + "` by " + Misc.humanReadableFormat(duration)).queue();
+			}
 		} else if(subCommand.equals("remove") || subCommand.equals("delete")) {
 			if(args.size() < 2) {
 				event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "truce remove <uuid/name>`").queue();
@@ -141,7 +165,7 @@ public class TruceCommand extends DiscordCommand {
 			}
 			String playerIdentifier = args.get(1);
 			KOS.TrucePlayer removePlayer = null;
-			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.truceList) {
+			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.getTruceList()) {
 				if(!trucePlayer.uuid.equals(playerIdentifier) && !trucePlayer.name.equalsIgnoreCase(playerIdentifier))
 					continue;
 				removePlayer = trucePlayer;
@@ -164,9 +188,9 @@ public class TruceCommand extends DiscordCommand {
 			event.getChannel().sendMessage("Removed `" + removePlayer.name + "` from the truce list").queue();
 
 		} else if(subCommand.equals("list")) {
-			String message = "TRUCED PLAYERS (" + KOS.INSTANCE.truceList.size() + ")";
-			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.truceList) {
-				message += "\n> " + (trucePlayer.name != null ? trucePlayer.name : trucePlayer.uuid);
+			String message = "TRUCED PLAYERS (" + KOS.INSTANCE.getTruceList().size() + ")";
+			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.getTruceList()) {
+				message += "\n> `" + (trucePlayer.name != null ? trucePlayer.name : trucePlayer.uuid) + "` - `" + trucePlayer.getTruceStatus() + "`";
 			}
 			event.getChannel().sendMessage(message).queue();
 		} else {

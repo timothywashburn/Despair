@@ -39,8 +39,6 @@ public class DisplayManager extends Thread {
 					message.editMessage(display).queue();
 				}, failure -> {});
 			}
-
-
 			sleepThread();
 		}
 	}
@@ -99,7 +97,7 @@ public class DisplayManager extends Thread {
 		display += offline;
 
 		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");
-		display += "\n\n" + dateFormat.format(OffsetDateTime.now(Despair.TIME_ZONE)) + " EDT";
+		display += "\n\n" + dateFormat.format(OffsetDateTime.now(Despair.TIME_ZONE)) + " EST";
 		return display;
 	}
 
@@ -116,7 +114,7 @@ public class DisplayManager extends Thread {
 		}
 
 		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");
-		display += "\n\n" + dateFormat.format(OffsetDateTime.now(Despair.TIME_ZONE)) + " EDT";
+		display += "\n\n" + dateFormat.format(OffsetDateTime.now(Despair.TIME_ZONE)) + " EST";
 		return display;
 	}
 
