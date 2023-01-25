@@ -13,7 +13,6 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.*;
 import org.json.JSONObject;
 
@@ -57,6 +56,7 @@ public class HypixelAPIManager {
 
 		HttpClient client = new DefaultHttpClient();
 		if(APIKeys.getAPIKey() == null) return requestProxy(uuid);
+		System.out.println("normal request");
 		HttpGet request = new HttpGet("https://api.hypixel.net/player?uuid=" + uuid + "&key=" + APIKeys.getAPIKey());
 		HttpResponse response;
 		String result;
@@ -121,13 +121,13 @@ public class HypixelAPIManager {
 			if(exception instanceof InvalidAPIKeyException) throw new InvalidAPIKeyException();
 			if(exception instanceof LookedUpNameRecentlyException) throw new LookedUpNameRecentlyException();
 			if(exception instanceof AuthenticationException) throw new AuthenticationException();
-			if(exception instanceof HttpHostConnectException) throw exception;
 			exception.printStackTrace();
 			return null;
 		}
 	}
 
 	public static JSONObject requestProxy(UUID uuid) throws Exception {
+		System.out.println("proxy request");
 		if(!APIKeys.hasKeys()) throw new NoAPIKeyException();
 		Config.KeyAndProxy keyAndProxy = APIKeys.getAPIKeyProxy();
 
@@ -167,7 +167,6 @@ public class HypixelAPIManager {
 		} catch(Exception exception) {
 			if(exception instanceof InvalidAPIKeyException) throw new InvalidAPIKeyException();
 			if(exception instanceof AuthenticationException) throw new AuthenticationException();
-			if(exception instanceof HttpHostConnectException) throw exception;
 			return null;
 		}
 	}
