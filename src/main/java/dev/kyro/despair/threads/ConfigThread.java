@@ -1,13 +1,13 @@
 package dev.kyro.despair.threads;
 
-import dev.kyro.despair.firestore.Config;
 import dev.kyro.despair.controllers.DiscordManager;
 import dev.kyro.despair.controllers.DisplayManager;
 import dev.kyro.despair.enums.Configurable;
+import dev.kyro.despair.firestore.Config;
 import dev.kyro.despair.misc.Misc;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 
@@ -20,10 +20,10 @@ import java.util.concurrent.TimeUnit;
 public class ConfigThread extends Thread {
 
 	public TextChannel channel;
-	public User author;
+	public Member author;
 	public Configurable configurable;
 
-	public ConfigThread(TextChannel channel, User author) {
+	public ConfigThread(TextChannel channel, Member author) {
 
 		this.channel = channel;
 		this.author = author;

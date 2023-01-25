@@ -1,27 +1,30 @@
 package dev.kyro.despair.controllers;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import dev.kyro.despair.Despair;
 import dev.kyro.despair.commands.*;
+import dev.kyro.despair.enums.PermissionLevel;
 import dev.kyro.despair.firestore.Config;
 import dev.kyro.despair.misc.Variables;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DiscordManager extends Thread implements EventListener {
 
@@ -71,12 +74,7 @@ public class DiscordManager extends Thread implements EventListener {
 	}
 
 	public static void setupSlashCommands() {
-		for(DiscordCommand command : commands) {
-			if(!(command instanceof SlashCommand)) continue;
-			SlashCommand slashCommand = (SlashCommand) command;
-
-			getMainGuild().upsertCommand(slashCommand.getCommandStructure()).queue();
-		}
+		for(DiscordCommand command : commands) getMainGuild().upsertCommand(command.getCommandStructure()).queue();
 	}
 
 	public static Guild getMainGuild() {
@@ -87,49 +85,47 @@ public class DiscordManager extends Thread implements EventListener {
 		commands.add(command);
 	}
 
-	public void onMessageReceived(MessageReceivedEvent event) {
+	public static boolean hasPermission(Member member, PermissionLevel permissionLevel) {
+		if(member.hasPermission(Permission.ADMINISTRATOR) || member.isOwner()) return true;
+		List<Role> roles = member.getRoles();
 
-		Message message = event.getMessage();
+		Role memberRole = getMainGuild().getRoleById(Config.INSTANCE.MEMBER_ROLE_ID);
+		if(memberRole != null && permissionLevel == PermissionLevel.MEMBER) return true;
 
-		if(message.getContentRaw().matches("(?i).*?\\bdad\\b.*?") && !message.getAuthor().isBot()) {
-			event.getChannel().sendMessage("unable to locate dad").queue();
-		}
+		Role adminRole = getMainGuild().getRoleById(Config.INSTANCE.ADMIN_ROLE_ID);
+		return adminRole != null;
+	}
 
-		if(!message.getContentRaw().startsWith(Despair.CONFIG.PREFIX)) return;
+	@Override
+	public void onEvent(@NotNull GenericEvent event) {
+		if(event instanceof ReadyEvent)
+			System.out.println("API is ready!");
 
-		String content = message.getContentRaw().replaceFirst(Despair.CONFIG.PREFIX, "");
-		List<String> args = new ArrayList<>(Arrays.asList(content.split(" ")));
-		String command = args.remove(0).toLowerCase();
+		if(event instanceof SlashCommandInteractionEvent)
+			onSlashCommand((SlashCommandInteractionEvent) event);
 
-		for(DiscordCommand discordCommand : commands) {
-
-			if(!discordCommand.command.equals(command) && !discordCommand.aliases.contains(command)) continue;
-
-			discordCommand.execute(event, args);
-			return;
-		}
+		if(event instanceof CommandAutoCompleteInteractionEvent)
+			onAutoComplete((CommandAutoCompleteInteractionEvent) event);
 	}
 
 	public void onSlashCommand(SlashCommandInteractionEvent event) {
 		String command = event.getName();
 		for(DiscordCommand discordCommand : commands) {
-			if(!(discordCommand instanceof SlashCommand) || !discordCommand.command.equals(command)) continue;
-			SlashCommand slashCommand = (SlashCommand) discordCommand;
-			slashCommand.execute(event);
+			if(!discordCommand.name.equals(command)) continue;
+			discordCommand.execute(event);
 			return;
 		}
 	}
 
-	@Override
-	public void onEvent(@NotNull GenericEvent event) {
-
-		if(event instanceof ReadyEvent)
-			System.out.println("API is ready!");
-
-		if(event instanceof MessageReceivedEvent)
-			onMessageReceived((MessageReceivedEvent) event);
-
-		if(event instanceof SlashCommandInteractionEvent)
-			onSlashCommand((SlashCommandInteractionEvent) event);
+	public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
+		String command = event.getName();
+		String currentOption = event.getFocusedOption().getName();
+		String currentValue = event.getFocusedOption().getValue();
+		for(DiscordCommand discordCommand : commands) {
+			if(!discordCommand.name.equals(command)) continue;
+			List<Command.Choice> choices = discordCommand.autoComplete(event, currentOption, currentValue);
+			event.replyChoices(choices.stream().limit(25).collect(Collectors.toList())).queue();
+			return;
+		}
 	}
 }

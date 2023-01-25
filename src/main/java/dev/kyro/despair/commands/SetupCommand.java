@@ -1,54 +1,37 @@
 package dev.kyro.despair.commands;
 
 import dev.kyro.despair.controllers.DiscordCommand;
+import dev.kyro.despair.controllers.DiscordManager;
 import dev.kyro.despair.controllers.DisplayManager;
 import dev.kyro.despair.enums.Configurable;
+import dev.kyro.despair.enums.PermissionLevel;
 import dev.kyro.despair.firestore.Config;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 public class SetupCommand extends DiscordCommand {
-	public static Map<Long, Long> confirmMap = new HashMap<>();
 
 	public SetupCommand() {
 		super("setup");
 	}
 
 	@Override
-	public void execute(MessageReceivedEvent event, List<String> args) {
+	public SlashCommandData getCommandStructure() {
+		return Commands.slash(name, "sets up the channels and messages for the bot");
+	}
 
-		boolean hasPermission = Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR) || event.getMember().isOwner();
-		for(Role role : event.getMember().getRoles()) {
-			if(role.getIdLong() != Config.INSTANCE.ADMIN_ROLE_ID) continue;
-			hasPermission = true;
-			break;
-		}
-		if(!hasPermission) {
-			event.getChannel().sendMessage("You need to have administrative access to do this").queue();
+	@Override
+	public void execute(SlashCommandInteractionEvent event) {
+		if(!DiscordManager.hasPermission(event.getMember(), PermissionLevel.ADMINISTRATOR)) {
+			event.reply("You need to have administrator access to do this").setEphemeral(true).queue();
 			return;
 		}
 
-		String subCommand = args.isEmpty() ? "" : args.get(0).toLowerCase();
-		if(!subCommand.equals("confirm")) {
-			confirmMap.put(event.getMember().getIdLong(), System.currentTimeMillis());
-			event.getChannel().sendMessage("Run `" + Config.INSTANCE.PREFIX + "setup confirm` to initiate the setup").queue();
-			return;
-		}
-
-		if(confirmMap.getOrDefault(event.getMember().getIdLong(), 0L) + 20_000 < System.currentTimeMillis()) {
-			event.getChannel().sendMessage("Please run `" + Config.INSTANCE.PREFIX + "setup` before confirming").queue();
-			return;
-		}
-		confirmMap.remove(event.getMember().getIdLong());
-
-		event.getChannel().sendMessage("Setting up bot... Please stand by").queue();
+		event.reply("Setting up bot... Please stand by").setEphemeral(true).queue();
 		Guild guild = event.getGuild();
 		Config.INSTANCE.set(Configurable.GUILD_ID, guild.getId());
 

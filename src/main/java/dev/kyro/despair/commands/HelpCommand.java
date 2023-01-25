@@ -1,14 +1,15 @@
 package dev.kyro.despair.commands;
 
-import dev.kyro.despair.firestore.Config;
 import dev.kyro.despair.controllers.DiscordCommand;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import dev.kyro.despair.controllers.DiscordManager;
+import dev.kyro.despair.enums.PermissionLevel;
+import dev.kyro.despair.firestore.Config;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class HelpCommand extends DiscordCommand {
 	public HelpCommand() {
@@ -16,15 +17,13 @@ public class HelpCommand extends DiscordCommand {
 	}
 
 	@Override
-	public void execute(MessageReceivedEvent event, List<String> args) {
+	public SlashCommandData getCommandStructure() {
+		return Commands.slash(name, "help for Despair discord bot");
+	}
 
-		boolean hasPermission = Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR) || event.getMember().isOwner();
-		for(Role role : event.getMember().getRoles()) {
-			if(role.getIdLong() != Config.INSTANCE.MEMBER_ROLE_ID) continue;
-			hasPermission = true;
-			break;
-		}
-		if(!hasPermission) {
+	@Override
+	public void execute(SlashCommandInteractionEvent event) {
+		if(!DiscordManager.hasPermission(event.getMember(), PermissionLevel.MEMBER)) {
 			event.getChannel().sendMessage("You need to have member access to do this").queue();
 			return;
 		}
