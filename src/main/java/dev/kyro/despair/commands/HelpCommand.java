@@ -32,7 +32,8 @@ public class HelpCommand extends DiscordCommand {
 		List<String> helpMessage = new ArrayList<>();
 
 		String prefix = Config.INSTANCE.PREFIX;
-		helpMessage.add("> `" + prefix + "kos` - Modify the kos");
+		helpMessage.add("> `" + prefix + "kos` - Modify the kos list");
+		helpMessage.add("> `" + prefix + "truce` - Modify the truce list");
 		helpMessage.add("> `" + prefix + "ping` - Visual check to see if the bot is responsive");
 		helpMessage.add("> `" + prefix + "config` - Modify config values");
 		helpMessage.add("> `" + prefix + "setup` - Set up all channels for the bot");
