@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.Role;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Users {
@@ -64,6 +65,7 @@ public class Users {
 			if(trialRole != null && member.getRoles().contains(trialRole)) memberUsers.add(discordUser);
 			if(memberRole != null && member.getRoles().contains(memberRole)) memberUsers.add(discordUser);
 		}
+		Collections.sort(memberUsers);
 		return memberUsers;
 	}
 

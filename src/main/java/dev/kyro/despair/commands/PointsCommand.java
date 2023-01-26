@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -120,8 +119,6 @@ public class PointsCommand extends DiscordCommand {
 			String message = "TOP POINTS";
 			List<Users.DiscordUser> sortedUsers = Users.INSTANCE.getUsersWithMember();
 			List<Users.DiscordUser> leaderboardUsers = sortedUsers.stream().limit(10).collect(Collectors.toList());
-			Collections.sort(sortedUsers);
-			Collections.sort(leaderboardUsers);
 			for(int i = 0; i < leaderboardUsers.size(); i++) {
 				Users.DiscordUser loopUser = leaderboardUsers.get(i);
 				if(loopUser.points == 0) continue;
