@@ -2,11 +2,16 @@ package dev.kyro.despair.firestore;
 
 import com.google.cloud.firestore.annotation.Exclude;
 import dev.kyro.despair.Despair;
+import dev.kyro.despair.controllers.DiscordManager;
 import dev.kyro.despair.controllers.HypixelPlayer;
 import dev.kyro.despair.controllers.PlayerTracker;
 import dev.kyro.despair.misc.Variables;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Users {
@@ -44,6 +49,24 @@ public class Users {
 			if(!usersWithTag.contains(discordUser) && discordUser.tags.contains("all")) usersWithTag.add(discordUser);
 		}
 		return usersWithTag;
+	}
+
+	@Exclude
+	public List<DiscordUser> getUsersWithMember() {
+		List<DiscordUser> memberUsers = new ArrayList<>();
+		if(DiscordManager.getMainGuild() == null) return memberUsers;
+
+		Role trialRole = DiscordManager.getMainGuild().getRoleById(Config.INSTANCE.TRIAL_ROLE_ID);
+		Role memberRole = DiscordManager.getMainGuild().getRoleById(Config.INSTANCE.MEMBER_ROLE_ID);
+
+		for(DiscordUser discordUser : discordUserList) {
+			Member member = DiscordManager.getMainGuild().getMemberById(discordUser.id);
+			if(member == null) continue;
+			if(trialRole != null && member.getRoles().contains(trialRole)) memberUsers.add(discordUser);
+			if(memberRole != null && member.getRoles().contains(memberRole)) memberUsers.add(discordUser);
+		}
+		Collections.sort(discordUserList);
+		return memberUsers;
 	}
 
 	@Exclude
@@ -88,9 +111,10 @@ public class Users {
 		}
 	}
 
-	public static class DiscordUser {
+	public static class DiscordUser implements Comparable<DiscordUser> {
 		public long id;
 		public List<String> tags = new ArrayList<>();
+		public int points = 0;
 
 		public DiscordUser() {}
 
@@ -105,6 +129,12 @@ public class Users {
 
 		public void save() {
 			Users.INSTANCE.save();
+		}
+
+		@Override
+		public int compareTo(@NotNull Users.DiscordUser otherUser) {
+			if(points > otherUser.points) return -1;
+			return points == otherUser.points ? 0 : -1;
 		}
 	}
 }

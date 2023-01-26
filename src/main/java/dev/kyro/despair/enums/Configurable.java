@@ -15,6 +15,7 @@ public enum Configurable {
 	KOS_DISPLAY_MESSAGE_ID("KOS Display Message", ConfigType.SNOWFLAKE, true, "kosmessage"),
 	TRUCE_DISPLAY_CHANNEL_ID("Truce Display Message", ConfigType.SNOWFLAKE, true, "trucedisplay"),
 	TRUCE_DISPLAY_MESSAGE_ID("Truce Display Message", ConfigType.SNOWFLAKE, true, "trucemessage"),
+	TRIAL_ROLE_ID("Trial Role", ConfigType.SNOWFLAKE, true, "trial"), // Same permissions as member just a second role
 	MEMBER_ROLE_ID("Member Role", ConfigType.SNOWFLAKE, false, "member"),
 	ADMIN_ROLE_ID("Admin Role", ConfigType.SNOWFLAKE, false, "admin");
 
@@ -43,7 +44,7 @@ public enum Configurable {
 		STRING("Input string"),
 		STRING_LOWER("Input string"),
 		NUMBER("Input value"),
-		SNOWFLAKE("Input id");
+		SNOWFLAKE("Input id (ex: 458458767634464792, not #channel-name or @user)");
 
 		public String instructions;
 

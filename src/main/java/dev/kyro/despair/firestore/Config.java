@@ -2,8 +2,12 @@ package dev.kyro.despair.firestore;
 
 import com.google.cloud.firestore.annotation.Exclude;
 import dev.kyro.despair.Despair;
+import dev.kyro.despair.controllers.DiscordManager;
 import dev.kyro.despair.enums.Configurable;
 import dev.kyro.despair.misc.Variables;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +30,7 @@ public class Config {
 	public long KOS_DISPLAY_MESSAGE_ID;
 	public long TRUCE_DISPLAY_CHANNEL_ID;
 	public long TRUCE_DISPLAY_MESSAGE_ID;
+	public long TRIAL_ROLE_ID;
 	public long MEMBER_ROLE_ID;
 	public long ADMIN_ROLE_ID;
 
@@ -64,6 +69,9 @@ public class Config {
 			case TRUCE_DISPLAY_MESSAGE_ID:
 				TRUCE_DISPLAY_MESSAGE_ID = Long.parseLong(value);
 				return;
+			case TRIAL_ROLE_ID:
+				TRIAL_ROLE_ID = Long.parseLong(value);
+				return;
 			case MEMBER_ROLE_ID:
 				MEMBER_ROLE_ID = Long.parseLong(value);
 				return;
@@ -85,19 +93,27 @@ public class Config {
 			case TRUCE_CATEGORIES:
 				return RAW_TRUCE_CATEGORIES;
 			case GUILD_ID:
-				return GUILD_ID + "";
+				Guild guild = DiscordManager.JDA.getGuildById(GUILD_ID);
+				return guild != null ? guild.getName() : "Not Found";
 			case KOS_DISPLAY_CHANNEL_ID:
-				return KOS_DISPLAY_CHANNEL_ID + "";
+				TextChannel kosDisplay = DiscordManager.JDA.getTextChannelById(KOS_DISPLAY_CHANNEL_ID);
+				return kosDisplay != null ? kosDisplay.getName() : "Not Found";
 			case KOS_DISPLAY_MESSAGE_ID:
 				return KOS_DISPLAY_MESSAGE_ID + "";
 			case TRUCE_DISPLAY_CHANNEL_ID:
-				return TRUCE_DISPLAY_CHANNEL_ID + "";
+				TextChannel truceDisplay = DiscordManager.JDA.getTextChannelById(TRUCE_DISPLAY_CHANNEL_ID);
+				return truceDisplay != null ? truceDisplay.getName() : "Not Found";
 			case TRUCE_DISPLAY_MESSAGE_ID:
 				return TRUCE_DISPLAY_MESSAGE_ID + "";
+			case TRIAL_ROLE_ID:
+				Role trialRole = DiscordManager.JDA.getRoleById(TRIAL_ROLE_ID);
+				return trialRole != null ? trialRole.getName() : "Not Found";
 			case MEMBER_ROLE_ID:
-				return MEMBER_ROLE_ID + "";
+				Role memberRole = DiscordManager.JDA.getRoleById(MEMBER_ROLE_ID);
+				return memberRole != null ? memberRole.getName() : "Not Found";
 			case ADMIN_ROLE_ID:
-				return ADMIN_ROLE_ID + "";
+				Role adminRole = DiscordManager.JDA.getRoleById(ADMIN_ROLE_ID);
+				return adminRole != null ? adminRole.getName() : "Not Found";
 		}
 		return null;
 	}

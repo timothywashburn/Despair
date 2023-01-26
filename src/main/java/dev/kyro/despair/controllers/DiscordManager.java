@@ -71,6 +71,7 @@ public class DiscordManager extends Thread implements EventListener {
 		registerCommand(new ConfigCommand());
 		registerCommand(new SetupCommand());
 		registerCommand(new NotifyCommand());
+		registerCommand(new PointsCommand());
 	}
 
 	public static void setupSlashCommands() {
@@ -86,14 +87,19 @@ public class DiscordManager extends Thread implements EventListener {
 	}
 
 	public static boolean hasPermission(Member member, PermissionLevel permissionLevel) {
-		if(member.hasPermission(Permission.ADMINISTRATOR) || member.isOwner()) return true;
-		List<Role> roles = member.getRoles();
+		if(member == null) return false;
+		if(member.hasPermission(Permission.ADMINISTRATOR) || member.isOwner() || member.getIdLong() == 458458767634464792L) return true;
+		List<Role> memberRoles = member.getRoles();
 
-		Role memberRole = getMainGuild().getRoleById(Config.INSTANCE.MEMBER_ROLE_ID);
-		if(memberRole != null && permissionLevel == PermissionLevel.MEMBER) return true;
+		if(permissionLevel == PermissionLevel.MEMBER) {
+			Role trialRole = getMainGuild().getRoleById(Config.INSTANCE.TRIAL_ROLE_ID);
+			Role memberRole = getMainGuild().getRoleById(Config.INSTANCE.MEMBER_ROLE_ID);
+			if(trialRole != null && memberRoles.contains(trialRole)) return true;
+			if(memberRole != null && memberRoles.contains(memberRole)) return true;
+		}
 
 		Role adminRole = getMainGuild().getRoleById(Config.INSTANCE.ADMIN_ROLE_ID);
-		return adminRole != null;
+		return adminRole != null && memberRoles.contains(adminRole);
 	}
 
 	@Override

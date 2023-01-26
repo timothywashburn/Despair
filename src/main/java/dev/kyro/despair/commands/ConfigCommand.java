@@ -31,7 +31,7 @@ public class ConfigCommand extends DiscordCommand {
 			break;
 		}
 		if(!isMember) {
-			event.getChannel().sendMessage("You need to have administrative access to do this").queue();
+			event.reply("You need to have administrative access to do this").setEphemeral(true).queue();
 			return;
 		}
 
