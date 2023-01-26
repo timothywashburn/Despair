@@ -71,7 +71,7 @@ public class ConfigThread extends Thread {
 						configurable = Configurable.getConfigurables()[reactionNum - 1];
 						promptValue();
 					},
-					60, TimeUnit.SECONDS, () -> {
+					30, TimeUnit.SECONDS, () -> {
 					});
 		});
 	}
