@@ -5,7 +5,6 @@ import com.google.cloud.firestore.Firestore;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
-import dev.kyro.despair.commands.*;
 import dev.kyro.despair.controllers.APIKeys;
 import dev.kyro.despair.controllers.DiscordManager;
 import dev.kyro.despair.firestore.Config;

@@ -79,7 +79,7 @@ public class DiscordManager extends Thread implements EventListener {
 	}
 
 	public static Guild getMainGuild() {
-		return DiscordManager.JDA.getGuildById(Config.INSTANCE.GUILD_ID);
+		return JDA.getGuildById(Config.INSTANCE.GUILD_ID);
 	}
 
 	public static void registerCommand(DiscordCommand command) {

@@ -25,7 +25,7 @@ public class Config {
 	public String API_KEY = "";
 	public int MAX_PLAYERS = 20;
 	public String RAW_TRUCE_CATEGORIES = "";
-	public long GUILD_ID;
+	public String GUILD_ID;
 	public long KOS_DISPLAY_CHANNEL_ID;
 	public long KOS_DISPLAY_MESSAGE_ID;
 	public long TRUCE_DISPLAY_CHANNEL_ID;
@@ -55,7 +55,7 @@ public class Config {
 				RAW_TRUCE_CATEGORIES = value;
 				return;
 			case GUILD_ID:
-				GUILD_ID = Long.parseLong(value);
+				GUILD_ID = value;
 				return;
 			case KOS_DISPLAY_CHANNEL_ID:
 				KOS_DISPLAY_CHANNEL_ID = Long.parseLong(value);
