@@ -4,6 +4,7 @@ import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import dev.kyro.despair.commands.*;
 import dev.kyro.despair.enums.PermissionLevel;
 import dev.kyro.despair.firestore.Config;
+import dev.kyro.despair.firestore.Users;
 import dev.kyro.despair.misc.Variables;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -15,6 +16,7 @@ import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -52,6 +54,12 @@ public class DiscordManager extends Thread implements EventListener {
 
 		new PlayerTracker().start();
 		new DisplayManager().start();
+
+		Role trialRole = DiscordManager.getMainGuild().getRoleById(Config.INSTANCE.TRIAL_ROLE_ID);
+		Role memberRole = DiscordManager.getMainGuild().getRoleById(Config.INSTANCE.MEMBER_ROLE_ID);
+		for(Member member : getMainGuild().loadMembers().get()) {
+			if(member.getRoles().contains(trialRole) || member.getRoles().contains(memberRole)) Users.INSTANCE.getUser(member.getIdLong());
+		}
 
 //		getMainGuild().retrieveCommands().queue(currentCommands -> {
 //			for(Command currentCommand : currentCommands) getMainGuild().deleteCommandById(currentCommand.getId()).queue();
@@ -112,6 +120,9 @@ public class DiscordManager extends Thread implements EventListener {
 
 		if(event instanceof CommandAutoCompleteInteractionEvent)
 			onAutoComplete((CommandAutoCompleteInteractionEvent) event);
+
+		if(event instanceof MessageReceivedEvent)
+			onMessageReceive((MessageReceivedEvent) event);
 	}
 
 	public void onSlashCommand(SlashCommandInteractionEvent event) {
@@ -133,5 +144,9 @@ public class DiscordManager extends Thread implements EventListener {
 			event.replyChoices(choices.stream().limit(25).collect(Collectors.toList())).queue();
 			return;
 		}
+	}
+
+	public void onMessageReceive(MessageReceivedEvent event) {
+		if(!event.isFromGuild()) return;
 	}
 }

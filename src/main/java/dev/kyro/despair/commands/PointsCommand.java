@@ -3,16 +3,15 @@ package dev.kyro.despair.commands;
 import dev.kyro.despair.controllers.DiscordCommand;
 import dev.kyro.despair.controllers.DiscordManager;
 import dev.kyro.despair.enums.PermissionLevel;
-import dev.kyro.despair.firestore.Config;
 import dev.kyro.despair.firestore.Users;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,9 +41,6 @@ public class PointsCommand extends DiscordCommand {
 			event.reply("You need to have member access to do this").setEphemeral(true).queue();
 			return;
 		}
-
-		Role trialRole = DiscordManager.getMainGuild().getRoleById(Config.INSTANCE.TRIAL_ROLE_ID);
-		Role memberRole = DiscordManager.getMainGuild().getRoleById(Config.INSTANCE.MEMBER_ROLE_ID);
 
 		String subCommand = event.getSubcommandName();
 		if(subCommand == null) {
@@ -124,8 +120,11 @@ public class PointsCommand extends DiscordCommand {
 			String message = "TOP POINTS";
 			List<Users.DiscordUser> sortedUsers = Users.INSTANCE.getUsersWithMember();
 			List<Users.DiscordUser> leaderboardUsers = sortedUsers.stream().limit(10).collect(Collectors.toList());
+			Collections.sort(sortedUsers);
+			Collections.sort(leaderboardUsers);
 			for(int i = 0; i < leaderboardUsers.size(); i++) {
 				Users.DiscordUser loopUser = leaderboardUsers.get(i);
+				if(loopUser.points == 0) continue;
 				Member loopMember = DiscordManager.getMainGuild().getMemberById(loopUser.id);
 				message += "\n> " + (i + 1) + ") `" + loopMember.getEffectiveName() + "` - `" + loopUser.points + " point" + (loopUser.points == 1 ? "" : "s") + "`";
 			}

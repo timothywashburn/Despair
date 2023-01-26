@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.entities.Role;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Users {
@@ -65,7 +64,6 @@ public class Users {
 			if(trialRole != null && member.getRoles().contains(trialRole)) memberUsers.add(discordUser);
 			if(memberRole != null && member.getRoles().contains(memberRole)) memberUsers.add(discordUser);
 		}
-		Collections.sort(discordUserList);
 		return memberUsers;
 	}
 
@@ -134,7 +132,7 @@ public class Users {
 		@Override
 		public int compareTo(@NotNull Users.DiscordUser otherUser) {
 			if(points > otherUser.points) return -1;
-			return points == otherUser.points ? 0 : -1;
+			return points == otherUser.points ? 0 : 1;
 		}
 	}
 }
