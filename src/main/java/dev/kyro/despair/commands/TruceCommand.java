@@ -36,7 +36,7 @@ public class TruceCommand extends DiscordCommand {
 		return Commands.slash(name, "modify & view the truce list").addSubcommands(
 				new SubcommandData("add", "add a player to the truce list")
 						.addOption(OptionType.STRING, "player", "the name or uuid of the player", true)
-						.addOption(OptionType.STRING, "type", "the type of truce", true, true)
+						.addOption(OptionType.STRING, "category", "the type of truce", true, true)
 						.addOption(OptionType.STRING, "duration", "duration in format 'Xw Xd Xh Xm' or 'perm'", true),
 				new SubcommandData("extend", "extend the truce of a player")
 						.addOption(OptionType.STRING, "player", "the name or uuid of the player", true, true)
@@ -212,7 +212,7 @@ public class TruceCommand extends DiscordCommand {
 				} else if(trucePlayer.name.toLowerCase().startsWith(currentValue)) choices.add(choice);
 			}
 		}
-		if(currentOption.equals("type")) {
+		if(currentOption.equals("category")) {
 			for(String category : Config.INSTANCE.getTruceListCategories()) {
 				Command.Choice choice = new Command.Choice(category, category);
 				if(currentValue.isEmpty()) {
