@@ -36,14 +36,23 @@ public class SetupCommand extends DiscordCommand {
 		Guild guild = event.getGuild();
 		Config.INSTANCE.set(Configurable.GUILD_ID, guild.getId());
 
+		Role trialRole = guild.getRoleById(Config.INSTANCE.TRIAL_ROLE_ID);
+		Role memberRole = guild.getRoleById(Config.INSTANCE.MEMBER_ROLE_ID);
 		guild.createCategory("KOS").queue(category -> {
 			category.upsertPermissionOverride(guild.getPublicRole()).setDenied(Permission.VIEW_CHANNEL).queue(override1 -> {
-				Role trialRole = guild.getRoleById(Config.INSTANCE.TRIAL_ROLE_ID);
-				if(trialRole != null) category.upsertPermissionOverride(trialRole).setAllowed(Permission.VIEW_CHANNEL).queue(override2 -> {
-					Role memberRole = guild.getRoleById(Config.INSTANCE.MEMBER_ROLE_ID);
-					if(memberRole != null) category.upsertPermissionOverride(memberRole).setAllowed(Permission.VIEW_CHANNEL).queue(override3 ->
-							createChannels(guild, category));
-				});
+				if(trialRole != null) {
+					category.upsertPermissionOverride(trialRole).setAllowed(Permission.VIEW_CHANNEL).queue(override2 -> {
+						if(memberRole != null) {
+							category.upsertPermissionOverride(memberRole).setAllowed(Permission.VIEW_CHANNEL).queue(override3 ->
+									createChannels(guild, category));
+						} else createChannels(guild, category);
+					});
+				} else {
+					if(memberRole != null) {
+						category.upsertPermissionOverride(memberRole).setAllowed(Permission.VIEW_CHANNEL).queue(override3 ->
+								createChannels(guild, category));
+					} else createChannels(guild, category);
+				}
 			});
 		});
 	}
