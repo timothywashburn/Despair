@@ -43,7 +43,6 @@ public class PointsCommand extends DiscordCommand {
 			return;
 		}
 
-		Users.DiscordUser discordUser = Users.INSTANCE.getUser(event.getMember().getIdLong());
 		Role trialRole = DiscordManager.getMainGuild().getRoleById(Config.INSTANCE.TRIAL_ROLE_ID);
 		Role memberRole = DiscordManager.getMainGuild().getRoleById(Config.INSTANCE.MEMBER_ROLE_ID);
 
@@ -53,19 +52,21 @@ public class PointsCommand extends DiscordCommand {
 			return;
 		}
 		if(subCommand.equals("balance")) {
-			if(!DiscordManager.hasPermission(event.getMember(), PermissionLevel.ADMINISTRATOR)) {
-				event.reply("You need to have administrator access to do this").setEphemeral(true).queue();
-				return;
-			}
-
 			Member targetMember = event.getMember();
-			if(event.getOption("member") != null) event.getOption("member").getAsMember();
+			if(event.getOption("member") != null) targetMember = event.getOption("member").getAsMember();
+			Users.DiscordUser discordTarget = Users.INSTANCE.getUser(targetMember.getIdLong());
+
 			if(!DiscordManager.hasPermission(targetMember, PermissionLevel.MEMBER)) {
 				event.reply("The target needs to have member access to do this").queue();
 				return;
 			}
 
-			event.reply("You have `" + discordUser.points + "` point" + (discordUser.points == 1 ? "" : "s")).setEphemeral(true).queue();
+			if(targetMember == event.getMember()) {
+				event.reply("You have `" + discordTarget.points + "` point" + (discordTarget.points == 1 ? "" : "s")).setEphemeral(true).queue();
+			} else {
+				event.reply("`" + targetMember.getEffectiveName() + "` has `" + discordTarget.points + "` point" +
+						(discordTarget.points == 1 ? "" : "s")).setEphemeral(true).queue();
+			}
 		} else if(subCommand.equals("add")) {
 			if(!DiscordManager.hasPermission(event.getMember(), PermissionLevel.ADMINISTRATOR)) {
 				event.reply("You need to have administrator access to do this").setEphemeral(true).queue();
@@ -73,6 +74,8 @@ public class PointsCommand extends DiscordCommand {
 			}
 
 			Member targetMember = event.getOption("member").getAsMember();
+			Users.DiscordUser discordTarget = Users.INSTANCE.getUser(targetMember.getIdLong());
+
 			if(!DiscordManager.hasPermission(targetMember, PermissionLevel.MEMBER)) {
 				event.reply("The target needs to have member access to do this").queue();
 				return;
@@ -84,9 +87,9 @@ public class PointsCommand extends DiscordCommand {
 				return;
 			}
 
-			discordUser.points += amount;
-			discordUser.save();
-			event.reply("You gave <@" + discordUser.id + "> `" + amount + "` point" + (amount == 1 ? "" : "s")).queue();
+			discordTarget.points += amount;
+			discordTarget.save();
+			event.reply("You gave <@" + discordTarget.id + "> `" + amount + "` point" + (amount == 1 ? "" : "s")).queue();
 		} else if(subCommand.equals("cashout")) {
 			if(!DiscordManager.hasPermission(event.getMember(), PermissionLevel.ADMINISTRATOR)) {
 				event.reply("You need to have administrator access to do this").setEphemeral(true).queue();
@@ -94,6 +97,8 @@ public class PointsCommand extends DiscordCommand {
 			}
 
 			Member targetMember = event.getOption("member").getAsMember();
+			Users.DiscordUser discordTarget = Users.INSTANCE.getUser(targetMember.getIdLong());
+
 			if(!DiscordManager.hasPermission(targetMember, PermissionLevel.MEMBER)) {
 				event.reply("The target needs to have member access to do this").queue();
 				return;
@@ -105,15 +110,17 @@ public class PointsCommand extends DiscordCommand {
 				return;
 			}
 
-			if(amount > discordUser.points) {
-				event.reply("That discord user only has `" + discordUser.points + "` point" + (discordUser.points == 1 ? "" : "s")).queue();
+			if(amount > discordTarget.points) {
+				event.reply("That discord user only has `" + discordTarget.points + "` point" + (discordTarget.points == 1 ? "" : "s")).queue();
 				return;
 			}
 
-			discordUser.points -= amount;
-			discordUser.save();
-			event.reply("<@" + discordUser.id + "> cashed out `" + amount + "` point" + (amount == 1 ? "" : "s")).queue();
+			discordTarget.points -= amount;
+			discordTarget.save();
+			event.reply("<@" + discordTarget.id + "> cashed out `" + amount + "` point" + (amount == 1 ? "" : "s")).queue();
 		} else if(subCommand.equals("leaderboard")) {
+			Users.DiscordUser discordUser = Users.INSTANCE.getUser(event.getMember().getIdLong());
+
 			String message = "TOP POINTS";
 			List<Users.DiscordUser> sortedUsers = Users.INSTANCE.getUsersWithMember();
 			List<Users.DiscordUser> leaderboardUsers = sortedUsers.stream().limit(10).collect(Collectors.toList());

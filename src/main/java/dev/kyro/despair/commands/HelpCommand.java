@@ -45,6 +45,6 @@ public class HelpCommand extends DiscordCommand {
 		for(String line : helpMessage) {
 			sendMessage += "\n" + line;
 		}
-		event.getChannel().sendMessage(sendMessage).queue();
+		event.reply(sendMessage).queue();
 	}
 }
