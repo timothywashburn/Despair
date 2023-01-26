@@ -90,7 +90,7 @@ public class PlayerTracker extends Thread {
 
 //						Thread check
 						for(ThreadChannel threadChannel : displayChannel.getThreadChannels()) {
-							if(threadChannel.getIdLong() != Config.INSTANCE.KOS_DISPLAY_MESSAGE_ID) continue;
+							if(!threadChannel.getId().equals(Config.INSTANCE.KOS_DISPLAY_MESSAGE_ID)) continue;
 							String pingString = "";
 							for(Users.DiscordUser discordUser : Users.INSTANCE.getUsersWithTags(hypixelPlayer, kosPlayer.tags)) {
 								pingString += " <@" + discordUser.id + ">";

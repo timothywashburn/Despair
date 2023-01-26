@@ -25,14 +25,14 @@ public class Config {
 	public String API_KEY = "";
 	public int MAX_PLAYERS = 20;
 	public String RAW_TRUCE_CATEGORIES = "";
-	public String GUILD_ID;
-	public long KOS_DISPLAY_CHANNEL_ID;
-	public long KOS_DISPLAY_MESSAGE_ID;
-	public long TRUCE_DISPLAY_CHANNEL_ID;
-	public long TRUCE_DISPLAY_MESSAGE_ID;
-	public long TRIAL_ROLE_ID;
-	public long MEMBER_ROLE_ID;
-	public long ADMIN_ROLE_ID;
+	public String GUILD_ID = "0";
+	public String KOS_DISPLAY_CHANNEL_ID = "0";
+	public String KOS_DISPLAY_MESSAGE_ID = "0";
+	public String TRUCE_DISPLAY_CHANNEL_ID = "0";
+	public String TRUCE_DISPLAY_MESSAGE_ID = "0";
+	public String TRIAL_ROLE_ID = "0";
+	public String MEMBER_ROLE_ID = "0";
+	public String ADMIN_ROLE_ID = "0";
 
 	public Config() {
 		INSTANCE = this;
@@ -58,25 +58,25 @@ public class Config {
 				GUILD_ID = value;
 				return;
 			case KOS_DISPLAY_CHANNEL_ID:
-				KOS_DISPLAY_CHANNEL_ID = Long.parseLong(value);
+				KOS_DISPLAY_CHANNEL_ID = value;
 				return;
 			case KOS_DISPLAY_MESSAGE_ID:
-				KOS_DISPLAY_MESSAGE_ID = Long.parseLong(value);
+				KOS_DISPLAY_MESSAGE_ID = value;
 				return;
 			case TRUCE_DISPLAY_CHANNEL_ID:
-				TRUCE_DISPLAY_CHANNEL_ID = Long.parseLong(value);
+				TRUCE_DISPLAY_CHANNEL_ID = value;
 				return;
 			case TRUCE_DISPLAY_MESSAGE_ID:
-				TRUCE_DISPLAY_MESSAGE_ID = Long.parseLong(value);
+				TRUCE_DISPLAY_MESSAGE_ID = value;
 				return;
 			case TRIAL_ROLE_ID:
-				TRIAL_ROLE_ID = Long.parseLong(value);
+				TRIAL_ROLE_ID = value;
 				return;
 			case MEMBER_ROLE_ID:
-				MEMBER_ROLE_ID = Long.parseLong(value);
+				MEMBER_ROLE_ID = value;
 				return;
 			case ADMIN_ROLE_ID:
-				ADMIN_ROLE_ID = Long.parseLong(value);
+				ADMIN_ROLE_ID = value;
 		}
 	}
 
