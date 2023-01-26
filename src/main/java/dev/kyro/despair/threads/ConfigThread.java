@@ -80,7 +80,7 @@ public class ConfigThread extends Thread {
 
 		channel.sendMessage(configurable.displayName + ": " + configurable.configType.instructions).queue();
 		DiscordManager.WAITER.waitForEvent(MessageReceivedEvent.class,
-				response -> response.getAuthor().equals(author) && response.getChannel() == channel,
+				response -> response.getAuthor().equals(author.getUser()) && response.getChannel() == channel,
 				response -> {
 					String message = response.getMessage().getContentRaw();
 					if(configurable.configType == Configurable.ConfigType.NUMBER) {

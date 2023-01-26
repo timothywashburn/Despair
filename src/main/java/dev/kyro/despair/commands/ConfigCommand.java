@@ -25,6 +25,7 @@ public class ConfigCommand extends DiscordCommand {
 			return;
 		}
 
+		event.reply("opening config").setEphemeral(true).queue();
 		new ConfigThread(event.getTextChannel(), event.getMember()).start();
 	}
 }
