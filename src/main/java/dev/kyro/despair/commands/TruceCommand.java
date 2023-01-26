@@ -1,9 +1,30 @@
 package dev.kyro.despair.commands;
 
 import dev.kyro.despair.controllers.DiscordCommand;
+import dev.kyro.despair.controllers.DiscordManager;
+import dev.kyro.despair.controllers.HypixelAPIManager;
+import dev.kyro.despair.controllers.HypixelPlayer;
+import dev.kyro.despair.enums.PermissionLevel;
+import dev.kyro.despair.exceptions.InvalidAPIKeyException;
+import dev.kyro.despair.exceptions.LookedUpNameRecentlyException;
+import dev.kyro.despair.exceptions.NoAPIKeyException;
+import dev.kyro.despair.firestore.Config;
+import dev.kyro.despair.firestore.KOS;
+import dev.kyro.despair.misc.Misc;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import org.json.JSONObject;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 public class TruceCommand extends DiscordCommand {
 	public TruceCommand() {
@@ -12,172 +33,193 @@ public class TruceCommand extends DiscordCommand {
 
 	@Override
 	public SlashCommandData getCommandStructure() {
-		return Commands.slash(name, "modify & view the truce list");
+		return Commands.slash(name, "modify & view the truce list").addSubcommands(
+				new SubcommandData("add", "add a player to the truce list")
+						.addOption(OptionType.STRING, "player", "the name or uuid of the player", true)
+						.addOption(OptionType.STRING, "type", "the type of truce", true, true)
+						.addOption(OptionType.STRING, "duration", "duration in format 'Xw Xd Xh Xm' or 'perm'", true),
+				new SubcommandData("extend", "extend the truce of a player")
+						.addOption(OptionType.STRING, "player", "the name or uuid of the player", true, true)
+						.addOption(OptionType.STRING, "duration", "duration in format 'Xw Xd Xh Xm' or 'perm'", true),
+				new SubcommandData("remove", "remove a player from the truce list")
+						.addOption(OptionType.STRING, "player", "the name or uuid of the player", true, true),
+				new SubcommandData("list", "list the players on the truce list")
+		);
 	}
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-//		if(!DiscordManager.hasPermission(event.getMember(), PermissionLevel.ADMINISTRATOR)) {
-//			event.getChannel().sendMessage("You need to have administrator access to do this").queue();
-//			return;
-//		}
-//
-//		if(args.isEmpty()) {
-//			event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "truce <add/extend/remove/list>`").queue();
-//			return;
-//		}
-//
-//		String subCommand = args.get(0).toLowerCase();
-//		if(subCommand.equals("add")) {
-//			if(args.size() < 4) {
-//				event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "truce add <uuid/name> <" +
-//						String.join("/", Config.INSTANCE.getTruceListCategories()) + "> <duration/perm>`").queue();
-//				return;
-//			}
-//
-//			String category = args.get(2).toLowerCase();
-//			if(!Config.INSTANCE.getTruceListCategories().contains(category)) {
-//				event.getChannel().sendMessage("Not a valid category: " +
-//						String.join(", ", Config.INSTANCE.getTruceListCategories()) + "").queue();
-//				return;
-//			}
-//
-//			Duration duration;
-//			if(args.get(3).equalsIgnoreCase("perm") || args.get(3).equalsIgnoreCase("permanent")) {
-//				duration = null;
-//			} else {
-//				String durationString = String.join(" ", args.subList(3, args.size()));
-//				try {
-//					duration = Misc.parseDuration(durationString);
-//				} catch(Exception exception) {
-//					exception.printStackTrace();
-//					event.getChannel().sendMessage("Invalid time provided").queue();
-//					return;
-//				}
-//			}
-//
-//			String playerIdentifier = args.get(1);
-//			JSONObject requestData;
-//			HypixelPlayer hypixelPlayer;
-//			try {
-//				if(Misc.isUUID(playerIdentifier)) {
-//					requestData = HypixelAPIManager.request(UUID.fromString(playerIdentifier));
-//				} else {
-//					requestData = HypixelAPIManager.request(playerIdentifier);
-//				}
-//			} catch(Exception exception) {
-//				if(exception instanceof NoAPIKeyException) {
-//					event.getChannel().sendMessage("No api key set").queue();
-//				} else if(exception instanceof InvalidAPIKeyException) {
-//					event.getChannel().sendMessage("Invalid api key").queue();
-//				} else if(exception instanceof LookedUpNameRecentlyException) {
-//					event.getChannel().sendMessage("That name was already looked up recently. Use the player's uuid instead or wait a minute").queue();
-//				}
-//				return;
-//			}
-//			hypixelPlayer = new HypixelPlayer(requestData);
-//
-//			if(KOS.INSTANCE.truceContainsPlayer(hypixelPlayer.UUID)) {
-//				event.getChannel().sendMessage(hypixelPlayer.name + " is already on the truce list").queue();
-//				return;
-//			}
-//
-//			KOS.TrucePlayer trucePlayer = new KOS.TrucePlayer(hypixelPlayer.name, hypixelPlayer.UUID.toString(), category, duration);
-//			trucePlayer.hypixelPlayer = hypixelPlayer;
-//			KOS.INSTANCE.addTrucePlayer(trucePlayer, true);
-//			if(duration == null) {
-//				event.getChannel().sendMessage("Permanently added `" + hypixelPlayer.name + "` to truce").queue();
-//			} else {
-//				event.getChannel().sendMessage("Added `" + hypixelPlayer.name + "` to truce for " + Misc.humanReadableFormat(duration)).queue();
-//			}
-//
-//		} else if(subCommand.equals("extend")) {
-//			if(args.size() < 3) {
-//				event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "truce extend <uuid/name> <duration>`").queue();
-//				return;
-//			}
-//
-//			String playerIdentifier = args.get(1);
-//			KOS.TrucePlayer extendPlayer = null;
-//			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.getTruceList()) {
-//				if(!trucePlayer.uuid.equals(playerIdentifier) && !trucePlayer.name.equalsIgnoreCase(playerIdentifier))
-//					continue;
-//				extendPlayer = trucePlayer;
-//				break;
-//			}
-//			if(extendPlayer == null) {
-//				if(Misc.isUUID(playerIdentifier)) {
-//					event.getChannel().sendMessage("Couldn't find that player").queue();
-//				} else {
-//					event.getChannel().sendMessage("Couldn't find that player (They may have changed their name; try removing them with their uuid)").queue();
-//				}
-//				return;
-//			}
-//
-//			if(extendPlayer.trucedUntil == null) {
-//				event.getChannel().sendMessage("That player already has a permanent truce").queue();
-//				return;
-//			}
-//
-//			Duration duration;
-//			if(args.get(2).equalsIgnoreCase("perm") || args.get(2).equalsIgnoreCase("permanent")) {
-//				duration = null;
-//			} else {
-//				String durationString = String.join(" ", args.subList(2, args.size()));
-//				try {
-//					duration = Misc.parseDuration(durationString);
-//				} catch(Exception exception) {
-//					exception.printStackTrace();
-//					event.getChannel().sendMessage("Invalid time provided").queue();
-//					return;
-//				}
-//			}
-//
-//			if(extendPlayer.trucedUntil.getTime() < new Date().getTime()) extendPlayer.trucedUntil = new Date();
-//			extendPlayer.extendTruce(duration);
-//			KOS.INSTANCE.save();
-//			if(duration == null) {
-//				event.getChannel().sendMessage("Changed truce for `" + extendPlayer.name + "` to be permanent").queue();
-//			} else {
-//				event.getChannel().sendMessage("Extended truce for `" + extendPlayer.name + "` by " + Misc.humanReadableFormat(duration)).queue();
-//			}
-//		} else if(subCommand.equals("remove") || subCommand.equals("delete")) {
-//			if(args.size() < 2) {
-//				event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "truce remove <uuid/name>`").queue();
-//				return;
-//			}
-//			String playerIdentifier = args.get(1);
-//			KOS.TrucePlayer removePlayer = null;
-//			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.getTruceList()) {
-//				if(!trucePlayer.uuid.equals(playerIdentifier) && !trucePlayer.name.equalsIgnoreCase(playerIdentifier))
-//					continue;
-//				removePlayer = trucePlayer;
-//				break;
-//			}
-//			if(removePlayer == null) {
-//				if(Misc.isUUID(playerIdentifier)) {
-//					event.getChannel().sendMessage("Couldn't find that player").queue();
-//				} else {
-//					event.getChannel().sendMessage("Couldn't find that player (They may have changed their name; try removing them with their uuid)").queue();
-//				}
-//				return;
-//			}
-//			if(removePlayer.hypixelPlayer == null) {
-//				event.getChannel().sendMessage("Something went wrong while attempting to remove player. Please report this").queue();
-//				return;
-//			}
-//
-//			KOS.INSTANCE.removeTrucePlayer(removePlayer, true);
-//			event.getChannel().sendMessage("Removed `" + removePlayer.name + "` from the truce list").queue();
-//
-//		} else if(subCommand.equals("list")) {
-//			String message = "TRUCED PLAYERS (" + KOS.INSTANCE.getTruceList().size() + ")";
-//			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.getTruceList()) {
-//				message += "\n> `" + (trucePlayer.name != null ? trucePlayer.name : trucePlayer.uuid) + "` - `" + trucePlayer.getTruceStatus() + "`";
-//			}
-//			event.getChannel().sendMessage(message).queue();
-//		} else {
-//			event.getChannel().sendMessage("Usage: `" + Config.INSTANCE.PREFIX + "truce <add/remove/list>`").queue();
-//		}
+		if(!DiscordManager.hasPermission(event.getMember(), PermissionLevel.ADMINISTRATOR)) {
+			event.reply("You need to have administrator access to do this").setEphemeral(true).queue();
+			return;
+		}
+
+		String subCommand = event.getSubcommandName();
+		if(subCommand == null) {
+			event.reply("Please run a sub command").queue();
+			return;
+		}
+		if(subCommand.equals("add")) {
+			String category = event.getOption("category").getAsString();
+			if(!Config.INSTANCE.getTruceListCategories().contains(category)) {
+				event.reply("Not a valid category: " +
+						String.join(", ", Config.INSTANCE.getTruceListCategories()) + "").setEphemeral(true).queue();
+				return;
+			}
+
+			Duration duration;
+			String durationString = event.getOption("duration").getAsString();
+			if(durationString.equalsIgnoreCase("perm") || durationString.equalsIgnoreCase("permanent")) {
+				duration = null;
+			} else {
+				try {
+					duration = Misc.parseDuration(durationString);
+				} catch(Exception exception) {
+					exception.printStackTrace();
+					event.reply("Invalid time provided").setEphemeral(true).queue();
+					return;
+				}
+			}
+
+			String playerIdentifier = event.getOption("player").getAsString();
+			JSONObject requestData;
+			HypixelPlayer hypixelPlayer;
+			try {
+				if(Misc.isUUID(playerIdentifier)) {
+					requestData = HypixelAPIManager.request(UUID.fromString(playerIdentifier));
+				} else {
+					requestData = HypixelAPIManager.request(playerIdentifier);
+				}
+			} catch(Exception exception) {
+				if(exception instanceof NoAPIKeyException) {
+					event.reply("No api key set").setEphemeral(true).queue();
+				} else if(exception instanceof InvalidAPIKeyException) {
+					event.reply("Invalid api key").setEphemeral(true).queue();
+				} else if(exception instanceof LookedUpNameRecentlyException) {
+					event.reply("That name was already looked up recently. Use the player's uuid instead or wait a minute").setEphemeral(true).queue();
+				}
+				return;
+			}
+			hypixelPlayer = new HypixelPlayer(requestData);
+
+			if(KOS.INSTANCE.truceContainsPlayer(hypixelPlayer.UUID)) {
+				event.reply(hypixelPlayer.name + " is already on the truce list").setEphemeral(true).queue();
+				return;
+			}
+
+			KOS.TrucePlayer trucePlayer = new KOS.TrucePlayer(hypixelPlayer.name, hypixelPlayer.UUID.toString(), category, duration);
+			trucePlayer.hypixelPlayer = hypixelPlayer;
+			KOS.INSTANCE.addTrucePlayer(trucePlayer, true);
+			if(duration == null) {
+				event.reply("Permanently added `" + hypixelPlayer.name + "` to truce").queue();
+			} else {
+				event.reply("Added `" + hypixelPlayer.name + "` to truce for " + Misc.humanReadableFormat(duration)).queue();
+			}
+
+		} else if(subCommand.equals("extend")) {
+			String playerIdentifier = event.getOption("player").getAsString();
+			KOS.TrucePlayer extendPlayer = null;
+			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.getTruceList()) {
+				if(!trucePlayer.uuid.equals(playerIdentifier) && !trucePlayer.name.equalsIgnoreCase(playerIdentifier))
+					continue;
+				extendPlayer = trucePlayer;
+				break;
+			}
+			if(extendPlayer == null) {
+				if(Misc.isUUID(playerIdentifier)) {
+					event.reply("Couldn't find that player").setEphemeral(true).queue();
+				} else {
+					event.reply("Couldn't find that player (They may have changed their name; try removing them with their uuid)").setEphemeral(true).queue();
+				}
+				return;
+			}
+
+			if(extendPlayer.trucedUntil == null) {
+				event.reply("That player already has a permanent truce").setEphemeral(true).queue();
+				return;
+			}
+
+			Duration duration;
+			String durationString = event.getOption("duration").getAsString();
+			if(durationString.equalsIgnoreCase("perm") || durationString.equalsIgnoreCase("permanent")) {
+				duration = null;
+			} else {
+				try {
+					duration = Misc.parseDuration(durationString);
+				} catch(Exception exception) {
+					exception.printStackTrace();
+					event.reply("Invalid time provided").setEphemeral(true).queue();
+					return;
+				}
+			}
+
+			if(extendPlayer.trucedUntil.getTime() < new Date().getTime()) extendPlayer.trucedUntil = new Date();
+			extendPlayer.extendTruce(duration);
+			KOS.INSTANCE.save();
+			if(duration == null) {
+				event.reply("Changed truce for `" + extendPlayer.name + "` to be permanent").queue();
+			} else {
+				event.reply("Extended truce for `" + extendPlayer.name + "` by " + Misc.humanReadableFormat(duration)).queue();
+			}
+		} else if(subCommand.equals("remove") || subCommand.equals("delete")) {
+			String playerIdentifier = event.getOption("player").getAsString();
+			KOS.TrucePlayer removePlayer = null;
+			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.getTruceList()) {
+				if(!trucePlayer.uuid.equals(playerIdentifier) && !trucePlayer.name.equalsIgnoreCase(playerIdentifier))
+					continue;
+				removePlayer = trucePlayer;
+				break;
+			}
+			if(removePlayer == null) {
+				if(Misc.isUUID(playerIdentifier)) {
+					event.reply("Couldn't find that player").setEphemeral(true).queue();
+				} else {
+					event.reply("Couldn't find that player (They may have changed their name; try removing them with their uuid)").setEphemeral(true).queue();
+				}
+				return;
+			}
+			if(removePlayer.hypixelPlayer == null) {
+				event.reply("Something went wrong while attempting to remove player. Please report this").setEphemeral(true).queue();
+				return;
+			}
+
+			KOS.INSTANCE.removeTrucePlayer(removePlayer, true);
+			event.reply("Removed `" + removePlayer.name + "` from the truce list").queue();
+
+		} else if(subCommand.equals("list")) {
+			String message = "TRUCED PLAYERS (" + KOS.INSTANCE.getTruceList().size() + ")";
+			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.getTruceList()) {
+				message += "\n> `" + (trucePlayer.name != null ? trucePlayer.name : trucePlayer.uuid) + "` - `" + trucePlayer.getTruceStatus() + "`";
+			}
+			event.reply(message).queue();
+		} else {
+			event.reply("Usage: `" + Config.INSTANCE.PREFIX + "truce <add/remove/list>`").queue();
+		}
+	}
+
+	@Override
+	public List<Command.Choice> autoComplete(CommandAutoCompleteInteractionEvent event, String currentOption, String currentValue) {
+		List<Command.Choice> choices = new ArrayList<>();
+		String subCommand = event.getSubcommandName();
+
+		if(!DiscordManager.hasPermission(event.getMember(), PermissionLevel.ADMINISTRATOR)) return choices;
+
+		if((subCommand.equals("remove") || subCommand.equals("extend")) && currentOption.equals("player")) {
+			for(KOS.TrucePlayer trucePlayer: KOS.INSTANCE.getTruceList()) {
+				Command.Choice choice = new Command.Choice(trucePlayer.name, trucePlayer.name);
+				if(currentValue.isEmpty()) {
+					choices.add(choice);
+				} else if(trucePlayer.name.toLowerCase().startsWith(currentValue)) choices.add(choice);
+			}
+		}
+		if(currentOption.equals("type")) {
+			for(String category : Config.INSTANCE.getTruceListCategories()) {
+				Command.Choice choice = new Command.Choice(category, category);
+				if(currentValue.isEmpty()) {
+					choices.add(choice);
+				} else if(category.startsWith(currentValue)) choices.add(choice);
+			}
+		}
+		return choices;
 	}
 }

@@ -47,6 +47,10 @@ public class KOSCommand extends DiscordCommand {
 		}
 
 		String subCommand = event.getSubcommandName();
+		if(subCommand == null) {
+			event.reply("Please run a sub command").queue();
+			return;
+		}
 		if(subCommand.equals("add")) {
 			if(!DiscordManager.hasPermission(event.getMember(), PermissionLevel.ADMINISTRATOR)) {
 				event.reply("You need to have administrator access to do this").setEphemeral(true).queue();
@@ -131,7 +135,7 @@ public class KOSCommand extends DiscordCommand {
 			event.reply("Removed `" + removePlayer.name + "` from the kos list").setEphemeral(true).queue();
 
 		} else if(subCommand.equals("list")) {
-			String message = "KOS PLAYERS";
+			String message = "KOS PLAYERS (" + KOS.INSTANCE.kosList.size() + "/" + PlayerTracker.getMaxPlayers() + ")";
 			for(KOS.KOSPlayer kosPlayer : KOS.INSTANCE.kosList) {
 				message += "\n> `" + (kosPlayer.name != null ? kosPlayer.name : kosPlayer.uuid) + "`" + kosPlayer.getTagsAsString();
 			}
