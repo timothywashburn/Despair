@@ -38,41 +38,49 @@ public class KOS {
 		}
 	}
 
+	@Exclude
 	public void addKOSPlayer(KOSPlayer kosPlayer, boolean save) {
 		kosList.add(kosPlayer);
 		if(save) save();
 	}
 
+	@Exclude
 	public void removeKOSPlayer(KOSPlayer kosPlayer, boolean save) {
 		kosList.remove(kosPlayer);
 		if(save) save();
 	}
 
+	@Exclude
 	public boolean kosContainsPlayer(UUID uuid) {
 		for(KOSPlayer kosPlayer : kosList) if(kosPlayer.uuid.equals(uuid.toString())) return true;
 		return false;
 	}
 
+	@Exclude
 	public void addTrucePlayer(TrucePlayer trucePlayer, boolean save) {
 		truceList.add(trucePlayer);
 		if(save) save();
 	}
 
+	@Exclude
 	public void removeTrucePlayer(TrucePlayer trucePlayer, boolean save) {
 		truceList.remove(trucePlayer);
 		if(save) save();
 	}
 
+	@Exclude
 	public boolean truceContainsPlayer(String name) {
 		for(TrucePlayer trucePlayer : truceList) if(trucePlayer.name.equalsIgnoreCase(name)) return true;
 		return false;
 	}
 
+	@Exclude
 	public List<TrucePlayer> getTruceList() {
 		Collections.sort(truceList);
 		return truceList;
 	}
 
+	@Exclude
 	public List<TrucePlayer> getPlayersInCategory(String category) {
 		List<TrucePlayer> players = new ArrayList<>();
 		for(TrucePlayer trucePlayer : getTruceList()) {
@@ -83,6 +91,22 @@ public class KOS {
 			if(trucePlayer.category.equals(category)) players.add(trucePlayer);
 		}
 		return players;
+	}
+
+	@Exclude
+	public TrucePlayer getTrucePlayer(Users.DiscordUser discordUser) {
+		for(TrucePlayer trucePlayer : truceList) {
+			if(trucePlayer.discordID == null) continue;
+			long trucePlayerDiscord = Long.parseLong(trucePlayer.discordID);
+			if(trucePlayerDiscord == discordUser.id) return trucePlayer;
+		}
+		return null;
+	}
+
+	@Exclude
+	public TrucePlayer getTrucePlayer(String identifier) {
+		for(TrucePlayer trucePlayer : truceList) if(trucePlayer.name.equalsIgnoreCase(identifier)) return trucePlayer;
+		return null;
 	}
 
 	@Exclude
@@ -150,6 +174,7 @@ public class KOS {
 		public String name;
 		public Date trucedUntil;
 		public String category;
+		public String discordID;
 
 		public TrucePlayer() {}
 

@@ -50,6 +50,10 @@ public class PointsCommand extends DiscordCommand {
 		if(subCommand.equals("balance")) {
 			Member targetMember = event.getMember();
 			if(event.getOption("member") != null) targetMember = event.getOption("member").getAsMember();
+			if(targetMember == null) {
+				event.reply("That user is not in the discord").queue();
+				return;
+			}
 			Users.DiscordUser discordTarget = Users.INSTANCE.getUser(targetMember.getIdLong());
 
 			if(!DiscordManager.hasPermission(targetMember, PermissionLevel.MEMBER)) {
@@ -70,6 +74,10 @@ public class PointsCommand extends DiscordCommand {
 			}
 
 			Member targetMember = event.getOption("member").getAsMember();
+			if(targetMember == null) {
+				event.reply("That user is not in the discord").queue();
+				return;
+			}
 			Users.DiscordUser discordTarget = Users.INSTANCE.getUser(targetMember.getIdLong());
 
 			if(!DiscordManager.hasPermission(targetMember, PermissionLevel.MEMBER)) {
@@ -97,6 +105,10 @@ public class PointsCommand extends DiscordCommand {
 			}
 
 			Member targetMember = event.getOption("member").getAsMember();
+			if(targetMember == null) {
+				event.reply("That user is not in the discord").queue();
+				return;
+			}
 			Users.DiscordUser discordTarget = Users.INSTANCE.getUser(targetMember.getIdLong());
 
 			if(!DiscordManager.hasPermission(targetMember, PermissionLevel.MEMBER)) {

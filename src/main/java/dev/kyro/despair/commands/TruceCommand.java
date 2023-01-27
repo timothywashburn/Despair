@@ -5,7 +5,9 @@ import dev.kyro.despair.controllers.DiscordManager;
 import dev.kyro.despair.enums.PermissionLevel;
 import dev.kyro.despair.firestore.Config;
 import dev.kyro.despair.firestore.KOS;
+import dev.kyro.despair.firestore.Users;
 import dev.kyro.despair.misc.Misc;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -35,23 +37,55 @@ public class TruceCommand extends DiscordCommand {
 						.addOption(OptionType.STRING, "player", "the name or uuid of the player", true, true)
 						.addOption(OptionType.STRING, "duration", "duration in format 'Xw Xd Xh Xm' or 'perm'", true),
 				new SubcommandData("remove", "remove a player from the truce list")
-						.addOption(OptionType.STRING, "player", "the name or uuid of the player", true, true),
+						.addOption(OptionType.STRING, "player", "the identifier of the player", true, true),
 				new SubcommandData("list", "list the players on the truce list")
+						.addOption(OptionType.STRING, "player", "the identifier of the player", true, true),
+				new SubcommandData("status", "view your truce status")
+						.addOption(OptionType.USER, "member", "the truced discord user", false, true),
+				new SubcommandData("assign", "assign a discord user to their associated truce")
+						.addOption(OptionType.USER, "member", "the discord user to assign the truce to", true, true)
+						.addOption(OptionType.STRING, "player", "the player on the truce list to assign the discord user to", true, true)
 		);
 	}
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-		if(!DiscordManager.hasPermission(event.getMember(), PermissionLevel.ADMINISTRATOR)) {
-			event.reply("You need to have administrator access to do this").setEphemeral(true).queue();
-			return;
-		}
-
 		String subCommand = event.getSubcommandName();
 		if(subCommand == null) {
 			event.reply("Please run a sub command").queue();
 			return;
 		}
+
+		if(subCommand.equals("status")) {
+			Member targetMember = event.getMember();
+			if(event.getOption("member") != null) targetMember = event.getOption("member").getAsMember();
+			if(targetMember == null) {
+				event.reply("That user is not in the discord").queue();
+				return;
+			}
+
+			Users.DiscordUser discordTarget = Users.INSTANCE.getUser(targetMember.getIdLong());
+			KOS.TrucePlayer trucePlayer = KOS.INSTANCE.getTrucePlayer(discordTarget);
+
+			if(trucePlayer == null) {
+				if(targetMember == event.getMember()) {
+					event.reply("You are not on the truce list").queue();
+				} else {
+					event.reply("That player isn't on truce (if they are, attach their discord with `/truce assign`)").queue();
+				}
+				return;
+			}
+
+			String targetName = targetMember == event.getMember() ? "Your" : targetMember.getEffectiveName() + "'s";
+			event.reply(targetName + " truce status is: `" + trucePlayer.getTruceStatus() + "`").queue();
+			return;
+		}
+
+		if(!DiscordManager.hasPermission(event.getMember(), PermissionLevel.ADMINISTRATOR)) {
+			event.reply("You need to have administrator access to do this").setEphemeral(true).queue();
+			return;
+		}
+
 		if(subCommand.equals("add")) {
 			String category = event.getOption("category").getAsString();
 			if(!Config.INSTANCE.getTruceListCategories().contains(category)) {
@@ -74,26 +108,26 @@ public class TruceCommand extends DiscordCommand {
 				}
 			}
 
-			String player = event.getOption("player").getAsString();
-			KOS.TrucePlayer trucePlayer = new KOS.TrucePlayer(player, category, duration);
+			String identifier = event.getOption("player").getAsString();
+			KOS.TrucePlayer trucePlayer = new KOS.TrucePlayer(identifier, category, duration);
 
 			KOS.INSTANCE.addTrucePlayer(trucePlayer, true);
 			if(duration == null) {
-				event.reply("Permanently added `" + player + "` to truce").queue();
+				event.reply("Permanently added `" + identifier + "` to truce").queue();
 			} else {
-				event.reply("Added `" + player + "` to truce for " + Misc.humanReadableFormat(duration)).queue();
+				event.reply("Added `" + identifier + "` to truce for " + Misc.humanReadableFormat(duration)).queue();
 			}
 
 		} else if(subCommand.equals("extend")) {
-			String player = event.getOption("player").getAsString();
+			String identifier = event.getOption("player").getAsString();
 			KOS.TrucePlayer extendPlayer = null;
 			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.getTruceList()) {
-				if(!trucePlayer.name.equalsIgnoreCase(player)) continue;
+				if(!trucePlayer.name.equalsIgnoreCase(identifier)) continue;
 				extendPlayer = trucePlayer;
 				break;
 			}
 			if(extendPlayer == null) {
-				if(Misc.isUUID(player)) {
+				if(Misc.isUUID(identifier)) {
 					event.reply("Couldn't find that player").setEphemeral(true).queue();
 				} else {
 					event.reply("Couldn't find that player (They may have changed their name; try removing them with their uuid)").setEphemeral(true).queue();
@@ -129,19 +163,10 @@ public class TruceCommand extends DiscordCommand {
 				event.reply("Extended truce for `" + extendPlayer.name + "` by " + Misc.humanReadableFormat(duration)).queue();
 			}
 		} else if(subCommand.equals("remove") || subCommand.equals("delete")) {
-			String player = event.getOption("player").getAsString();
-			KOS.TrucePlayer removePlayer = null;
-			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.getTruceList()) {
-				if(!trucePlayer.name.equalsIgnoreCase(player)) continue;
-				removePlayer = trucePlayer;
-				break;
-			}
+			String identifier = event.getOption("player").getAsString();
+			KOS.TrucePlayer removePlayer = KOS.INSTANCE.getTrucePlayer(identifier);
 			if(removePlayer == null) {
-				if(Misc.isUUID(player)) {
-					event.reply("Couldn't find that player").setEphemeral(true).queue();
-				} else {
-					event.reply("Couldn't find that player (They may have changed their name; try removing them with their uuid)").setEphemeral(true).queue();
-				}
+				event.reply("Couldn't find that player").setEphemeral(true).queue();
 				return;
 			}
 
@@ -154,8 +179,22 @@ public class TruceCommand extends DiscordCommand {
 				message += "\n> `" + trucePlayer.name + "` - `" + trucePlayer.getTruceStatus() + "`";
 			}
 			event.reply(message).queue();
-		} else {
-			event.reply("Usage: `" + Config.INSTANCE.PREFIX + "truce <add/remove/list>`").queue();
+		} else if(subCommand.equals("assign")) {
+			Member targetMember = event.getOption("member").getAsMember();
+			if(targetMember == null) {
+				event.reply("That user is not in the discord").queue();
+				return;
+			}
+
+			String identifier = event.getOption("player").getAsString();
+			KOS.TrucePlayer trucePlayer = KOS.INSTANCE.getTrucePlayer(identifier);
+			if(trucePlayer == null) {
+				event.reply("Couldn't find that player").setEphemeral(true).queue();
+				return;
+			}
+
+			trucePlayer.discordID = targetMember.getId();
+			event.reply("Assigned " + identifier + " to " + targetMember.getEffectiveName()).queue();
 		}
 	}
 
@@ -166,7 +205,7 @@ public class TruceCommand extends DiscordCommand {
 
 		if(!DiscordManager.hasPermission(event.getMember(), PermissionLevel.ADMINISTRATOR)) return choices;
 
-		if((subCommand.equals("remove") || subCommand.equals("extend")) && currentOption.equals("player")) {
+		if((subCommand.equals("remove") || subCommand.equals("extend") || subCommand.equals("assign")) && currentOption.equals("player")) {
 			for(KOS.TrucePlayer trucePlayer: KOS.INSTANCE.getTruceList()) {
 				Command.Choice choice = new Command.Choice(trucePlayer.name, trucePlayer.name);
 				if(currentValue.isEmpty()) {
