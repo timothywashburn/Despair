@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.time.Duration;
@@ -100,7 +101,12 @@ public class TruceCommand extends DiscordCommand {
 				}
 				return;
 			}
-			hypixelPlayer = new HypixelPlayer(requestData);
+			try {
+				hypixelPlayer = new HypixelPlayer(requestData);
+			} catch(JSONException ignored) {
+				event.reply("Invalid player").setEphemeral(true).queue();
+				return;
+			}
 
 			if(KOS.INSTANCE.truceContainsPlayer(hypixelPlayer.UUID)) {
 				event.reply(hypixelPlayer.name + " is already on the truce list").setEphemeral(true).queue();
