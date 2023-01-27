@@ -63,8 +63,8 @@ public class KOS {
 		if(save) save();
 	}
 
-	public boolean truceContainsPlayer(UUID uuid) {
-		for(TrucePlayer trucePlayer : truceList) if(trucePlayer.uuid.equals(uuid.toString())) return true;
+	public boolean truceContainsPlayer(String name) {
+		for(TrucePlayer trucePlayer : truceList) if(trucePlayer.name.equalsIgnoreCase(name)) return true;
 		return false;
 	}
 
@@ -148,26 +148,15 @@ public class KOS {
 
 	public static class TrucePlayer implements Comparable<TrucePlayer> {
 		public String name;
-		public String uuid;
 		public Date trucedUntil;
 		public String category;
-		public List<String> altUUIDs = new ArrayList<>();
-
-		@Exclude
-		public HypixelPlayer hypixelPlayer;
 
 		public TrucePlayer() {}
 
-		public TrucePlayer(String name, String uuid, String category, Duration truceDuration) {
+		public TrucePlayer(String name, String category, Duration truceDuration) {
 			this.name = name;
-			setUuid(uuid);
 			this.category = category;
 			if(truceDuration != null) trucedUntil = new Date(new Date().getTime() + truceDuration.toMillis());
-		}
-
-		public void setUuid(String uuid) {
-			this.uuid = uuid;
-			hypixelPlayer = new HypixelPlayer(UUID.fromString(uuid));
 		}
 
 		public void extendTruce(Duration duration) {

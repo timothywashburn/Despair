@@ -2,12 +2,7 @@ package dev.kyro.despair.commands;
 
 import dev.kyro.despair.controllers.DiscordCommand;
 import dev.kyro.despair.controllers.DiscordManager;
-import dev.kyro.despair.controllers.HypixelAPIManager;
-import dev.kyro.despair.controllers.HypixelPlayer;
 import dev.kyro.despair.enums.PermissionLevel;
-import dev.kyro.despair.exceptions.InvalidAPIKeyException;
-import dev.kyro.despair.exceptions.LookedUpNameRecentlyException;
-import dev.kyro.despair.exceptions.NoAPIKeyException;
 import dev.kyro.despair.firestore.Config;
 import dev.kyro.despair.firestore.KOS;
 import dev.kyro.despair.misc.Misc;
@@ -18,14 +13,11 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 public class TruceCommand extends DiscordCommand {
 	public TruceCommand() {
@@ -82,57 +74,26 @@ public class TruceCommand extends DiscordCommand {
 				}
 			}
 
-			String playerIdentifier = event.getOption("player").getAsString();
-			JSONObject requestData;
-			HypixelPlayer hypixelPlayer;
-			try {
-				if(Misc.isUUID(playerIdentifier)) {
-					requestData = HypixelAPIManager.request(UUID.fromString(playerIdentifier));
-				} else {
-					requestData = HypixelAPIManager.request(playerIdentifier);
-				}
-			} catch(Exception exception) {
-				if(exception instanceof NoAPIKeyException) {
-					event.reply("No api key set").setEphemeral(true).queue();
-				} else if(exception instanceof InvalidAPIKeyException) {
-					event.reply("Invalid api key").setEphemeral(true).queue();
-				} else if(exception instanceof LookedUpNameRecentlyException) {
-					event.reply("That name was already looked up recently. Use the player's uuid instead or wait a minute").setEphemeral(true).queue();
-				}
-				return;
-			}
-			try {
-				hypixelPlayer = new HypixelPlayer(requestData);
-			} catch(JSONException ignored) {
-				event.reply("Invalid player").setEphemeral(true).queue();
-				return;
-			}
+			String player = event.getOption("player").getAsString();
+			KOS.TrucePlayer trucePlayer = new KOS.TrucePlayer(player, category, duration);
 
-			if(KOS.INSTANCE.truceContainsPlayer(hypixelPlayer.UUID)) {
-				event.reply(hypixelPlayer.name + " is already on the truce list").setEphemeral(true).queue();
-				return;
-			}
-
-			KOS.TrucePlayer trucePlayer = new KOS.TrucePlayer(hypixelPlayer.name, hypixelPlayer.UUID.toString(), category, duration);
-			trucePlayer.hypixelPlayer = hypixelPlayer;
 			KOS.INSTANCE.addTrucePlayer(trucePlayer, true);
 			if(duration == null) {
-				event.reply("Permanently added `" + hypixelPlayer.name + "` to truce").queue();
+				event.reply("Permanently added `" + player + "` to truce").queue();
 			} else {
-				event.reply("Added `" + hypixelPlayer.name + "` to truce for " + Misc.humanReadableFormat(duration)).queue();
+				event.reply("Added `" + player + "` to truce for " + Misc.humanReadableFormat(duration)).queue();
 			}
 
 		} else if(subCommand.equals("extend")) {
-			String playerIdentifier = event.getOption("player").getAsString();
+			String player = event.getOption("player").getAsString();
 			KOS.TrucePlayer extendPlayer = null;
 			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.getTruceList()) {
-				if(!trucePlayer.uuid.equals(playerIdentifier) && !trucePlayer.name.equalsIgnoreCase(playerIdentifier))
-					continue;
+				if(!trucePlayer.name.equalsIgnoreCase(player)) continue;
 				extendPlayer = trucePlayer;
 				break;
 			}
 			if(extendPlayer == null) {
-				if(Misc.isUUID(playerIdentifier)) {
+				if(Misc.isUUID(player)) {
 					event.reply("Couldn't find that player").setEphemeral(true).queue();
 				} else {
 					event.reply("Couldn't find that player (They may have changed their name; try removing them with their uuid)").setEphemeral(true).queue();
@@ -168,24 +129,19 @@ public class TruceCommand extends DiscordCommand {
 				event.reply("Extended truce for `" + extendPlayer.name + "` by " + Misc.humanReadableFormat(duration)).queue();
 			}
 		} else if(subCommand.equals("remove") || subCommand.equals("delete")) {
-			String playerIdentifier = event.getOption("player").getAsString();
+			String player = event.getOption("player").getAsString();
 			KOS.TrucePlayer removePlayer = null;
 			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.getTruceList()) {
-				if(!trucePlayer.uuid.equals(playerIdentifier) && !trucePlayer.name.equalsIgnoreCase(playerIdentifier))
-					continue;
+				if(!trucePlayer.name.equalsIgnoreCase(player)) continue;
 				removePlayer = trucePlayer;
 				break;
 			}
 			if(removePlayer == null) {
-				if(Misc.isUUID(playerIdentifier)) {
+				if(Misc.isUUID(player)) {
 					event.reply("Couldn't find that player").setEphemeral(true).queue();
 				} else {
 					event.reply("Couldn't find that player (They may have changed their name; try removing them with their uuid)").setEphemeral(true).queue();
 				}
-				return;
-			}
-			if(removePlayer.hypixelPlayer == null) {
-				event.reply("Something went wrong while attempting to remove player. Please report this").setEphemeral(true).queue();
 				return;
 			}
 
@@ -195,7 +151,7 @@ public class TruceCommand extends DiscordCommand {
 		} else if(subCommand.equals("list")) {
 			String message = "TRUCED PLAYERS (" + KOS.INSTANCE.getTruceList().size() + ")";
 			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.getTruceList()) {
-				message += "\n> `" + (trucePlayer.name != null ? trucePlayer.name : trucePlayer.uuid) + "` - `" + trucePlayer.getTruceStatus() + "`";
+				message += "\n> `" + trucePlayer.name + "` - `" + trucePlayer.getTruceStatus() + "`";
 			}
 			event.reply(message).queue();
 		} else {
