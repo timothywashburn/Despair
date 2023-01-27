@@ -4,6 +4,7 @@ import dev.kyro.despair.controllers.DiscordCommand;
 import dev.kyro.despair.controllers.DiscordManager;
 import dev.kyro.despair.enums.PermissionLevel;
 import dev.kyro.despair.firestore.Users;
+import dev.kyro.despair.misc.Misc;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -26,10 +27,10 @@ public class PointsCommand extends DiscordCommand {
 						.addOption(OptionType.USER, "member", "the discord user to view the balance of"),
 				new SubcommandData("add", "add points to a player")
 						.addOption(OptionType.USER, "member", "the discord user to add points to", true)
-						.addOption(OptionType.INTEGER, "amount", "amount of points to add", true),
+						.addOption(OptionType.NUMBER, "amount", "amount of points to add", true),
 				new SubcommandData("cashout", "for players cashing in points")
 						.addOption(OptionType.USER, "member", "the discord user cashing in points", true)
-						.addOption(OptionType.INTEGER, "amount", "amount of points to add", true),
+						.addOption(OptionType.NUMBER, "amount", "amount of points to add", true),
 				new SubcommandData("leaderboard", "displays a leaderboard of points")
 		);
 	}
@@ -57,7 +58,7 @@ public class PointsCommand extends DiscordCommand {
 			}
 
 			if(targetMember == event.getMember()) {
-				event.reply("You have `" + discordTarget.points + "` point" + (discordTarget.points == 1 ? "" : "s")).setEphemeral(true).queue();
+				event.reply("You have `" + Misc.formatPoints(discordTarget.points) + "` point" + (discordTarget.points == 1 ? "" : "s")).setEphemeral(true).queue();
 			} else {
 				event.reply("`" + targetMember.getEffectiveName() + "` has `" + discordTarget.points + "` point" +
 						(discordTarget.points == 1 ? "" : "s")).setEphemeral(true).queue();
@@ -76,15 +77,19 @@ public class PointsCommand extends DiscordCommand {
 				return;
 			}
 
-			int amount = event.getOption("amount").getAsInt();
+			double amount = event.getOption("amount").getAsDouble();
 			if(amount <= 0) {
 				event.reply("Invalid amount").queue();
+				return;
+			}
+			if(amount != Misc.round(amount, 1)) {
+				event.reply("Amount cannot have more than 1 digit of precision (ex: 12.2)").queue();
 				return;
 			}
 
 			discordTarget.points += amount;
 			discordTarget.save();
-			event.reply("You gave <@" + discordTarget.id + "> `" + amount + "` point" + (amount == 1 ? "" : "s")).queue();
+			event.reply("You gave <@" + discordTarget.id + "> `" + Misc.formatPoints(amount) + "` point" + (amount == 1 ? "" : "s")).queue();
 		} else if(subCommand.equals("cashout")) {
 			if(!DiscordManager.hasPermission(event.getMember(), PermissionLevel.ADMINISTRATOR)) {
 				event.reply("You need to have administrator access to do this").setEphemeral(true).queue();
@@ -99,20 +104,24 @@ public class PointsCommand extends DiscordCommand {
 				return;
 			}
 
-			int amount = event.getOption("amount").getAsInt();
+			double amount = event.getOption("amount").getAsDouble();
 			if(amount <= 0) {
 				event.reply("Invalid amount").queue();
 				return;
 			}
+			if(amount != Misc.round(amount, 1)) {
+				event.reply("Amount cannot have more than 1 digit of precision (ex: 12.2)").queue();
+				return;
+			}
 
 			if(amount > discordTarget.points) {
-				event.reply("That discord user only has `" + discordTarget.points + "` point" + (discordTarget.points == 1 ? "" : "s")).queue();
+				event.reply("That discord user only has `" + Misc.formatPoints(discordTarget.points) + "` point" + (discordTarget.points == 1 ? "" : "s")).queue();
 				return;
 			}
 
 			discordTarget.points -= amount;
 			discordTarget.save();
-			event.reply("<@" + discordTarget.id + "> cashed out `" + amount + "` point" + (amount == 1 ? "" : "s")).queue();
+			event.reply("<@" + discordTarget.id + "> cashed out `" + Misc.formatPoints(amount) + "` point" + (amount == 1 ? "" : "s")).queue();
 		} else if(subCommand.equals("leaderboard")) {
 			Users.DiscordUser discordUser = Users.INSTANCE.getUser(event.getMember().getIdLong());
 
@@ -123,11 +132,11 @@ public class PointsCommand extends DiscordCommand {
 				Users.DiscordUser loopUser = leaderboardUsers.get(i);
 				if(loopUser.points == 0) continue;
 				Member loopMember = DiscordManager.getMainGuild().getMemberById(loopUser.id);
-				message += "\n> " + (i + 1) + ") `" + loopMember.getEffectiveName() + "` - `" + loopUser.points + " point" + (loopUser.points == 1 ? "" : "s") + "`";
+				message += "\n> " + (i + 1) + ") `" + loopMember.getEffectiveName() + "` - `" + Misc.formatPoints(loopUser.points) + " point" + (loopUser.points == 1 ? "" : "s") + "`";
 			}
 			if(!leaderboardUsers.contains(discordUser)) {
 				message += "\n> \n> " + (sortedUsers.indexOf(discordUser) + 1) + ") `" + event.getMember().getEffectiveName() +
-						"` - `" + discordUser.points + " point" + (discordUser.points == 1 ? "" : "s") + "`";
+						"` - `" + Misc.formatPoints(discordUser.points) + " point" + (discordUser.points == 1 ? "" : "s") + "`";
 			}
 			event.reply(message).queue();
 		}

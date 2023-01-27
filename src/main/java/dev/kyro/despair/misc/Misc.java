@@ -1,5 +1,6 @@
 package dev.kyro.despair.misc;
 
+import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -7,6 +8,10 @@ import java.util.regex.Pattern;
 
 public class Misc {
 	private static final Pattern periodPattern = Pattern.compile("(\\d+)([mhdw])");
+
+	public static String formatPoints(double amount) {
+		return new DecimalFormat("0.#").format(amount);
+	}
 
 	public static String obfuscateUUID(UUID uuid) {
 		String uuidString = uuid.toString();
@@ -18,6 +23,11 @@ public class Misc {
 			return firstPart + "..." + lastPart;
 		}
 		return uuidString;
+	}
+
+	public static double round(double value, int precision) {
+		int scale = (int) Math.pow(10, precision);
+		return (double) Math.round(value * scale) / scale;
 	}
 
 	public static Duration parseDuration(String durationString) throws Exception {

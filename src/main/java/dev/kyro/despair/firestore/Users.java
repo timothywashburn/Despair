@@ -62,8 +62,11 @@ public class Users {
 		for(DiscordUser discordUser : discordUserList) {
 			Member member = DiscordManager.getMainGuild().getMemberById(discordUser.id);
 			if(member == null) continue;
-			if(trialRole != null && member.getRoles().contains(trialRole)) memberUsers.add(discordUser);
-			if(memberRole != null && member.getRoles().contains(memberRole)) memberUsers.add(discordUser);
+			if(trialRole != null && (member.getRoles().contains(trialRole) || trialRole.isPublicRole())) {
+				memberUsers.add(discordUser);
+			} else if(memberRole != null && (member.getRoles().contains(memberRole) || memberRole.isPublicRole())) {
+				memberUsers.add(discordUser);
+			}
 		}
 		Collections.sort(memberUsers);
 		return memberUsers;
@@ -114,7 +117,7 @@ public class Users {
 	public static class DiscordUser implements Comparable<DiscordUser> {
 		public long id;
 		public List<String> tags = new ArrayList<>();
-		public int points = 0;
+		public double points = 0;
 
 		public DiscordUser() {}
 

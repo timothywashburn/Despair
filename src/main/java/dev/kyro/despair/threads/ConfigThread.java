@@ -71,7 +71,7 @@ public class ConfigThread extends Thread {
 						configurable = Configurable.getConfigurables()[reactionNum - 1];
 						promptValue();
 					},
-					30, TimeUnit.SECONDS, () -> {
+					60, TimeUnit.SECONDS, () -> {
 					});
 		});
 	}
@@ -128,7 +128,7 @@ public class ConfigThread extends Thread {
 						channel.sendMessage("Updated " + configurable.displayName + " to " + Config.INSTANCE.get(configurable)).queue();
 					}
 				},
-				60, TimeUnit.SECONDS, this::timeExpired);
+				30, TimeUnit.SECONDS, this::timeExpired);
 	}
 
 	public void timeExpired() {}
