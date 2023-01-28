@@ -38,13 +38,13 @@ public class TruceCommand extends DiscordCommand {
 						.addOption(OptionType.STRING, "duration", "duration in format 'Xw Xd Xh Xm' or 'perm'", true),
 				new SubcommandData("remove", "remove a player from the truce list")
 						.addOption(OptionType.STRING, "player", "the identifier of the player", true, true),
-				new SubcommandData("list", "list the players on the truce list")
-						.addOption(OptionType.STRING, "player", "the identifier of the player", true, true),
+				new SubcommandData("list", "list the players on the truce list"),
 				new SubcommandData("status", "view your truce status")
-						.addOption(OptionType.USER, "member", "the truced discord user", false, true),
+						.addOption(OptionType.USER, "member", "the truced discord user", false),
 				new SubcommandData("assign", "assign a discord user to their associated truce")
-						.addOption(OptionType.USER, "member", "the discord user to assign the truce to", true, true)
-						.addOption(OptionType.STRING, "player", "the player on the truce list to assign the discord user to", true, true)
+						.addOption(OptionType.USER, "member", "the discord user to assign the truce to", true)
+						.addOption(OptionType.STRING, "player", "the player on the truce list to assign the discord user to " +
+								"(none to remove)",true, true)
 		);
 	}
 
@@ -59,8 +59,12 @@ public class TruceCommand extends DiscordCommand {
 		if(subCommand.equals("status")) {
 			Member targetMember = event.getMember();
 			if(event.getOption("member") != null) targetMember = event.getOption("member").getAsMember();
+			if(!DiscordManager.hasPermission(event.getMember(), PermissionLevel.MEMBER) && targetMember != event.getMember()) {
+				event.reply("As a non-member you can only view your own truce status").setEphemeral(true).queue();
+				return;
+			}
 			if(targetMember == null) {
-				event.reply("That user is not in the discord").queue();
+				event.reply("That user is not in the discord").setEphemeral(true).queue();
 				return;
 			}
 
@@ -69,9 +73,9 @@ public class TruceCommand extends DiscordCommand {
 
 			if(trucePlayer == null) {
 				if(targetMember == event.getMember()) {
-					event.reply("You are not on the truce list").queue();
+					event.reply("You are not on the truce list").setEphemeral(true).queue();
 				} else {
-					event.reply("That player isn't on truce (if they are, attach their discord with `/truce assign`)").queue();
+					event.reply("That player isn't on truce (if they are, attach their discord with `/truce assign`)").setEphemeral(true).queue();
 				}
 				return;
 			}
@@ -182,19 +186,30 @@ public class TruceCommand extends DiscordCommand {
 		} else if(subCommand.equals("assign")) {
 			Member targetMember = event.getOption("member").getAsMember();
 			if(targetMember == null) {
-				event.reply("That user is not in the discord").queue();
+				event.reply("That user is not in the discord").setEphemeral(true).queue();
 				return;
 			}
 
 			String identifier = event.getOption("player").getAsString();
-			KOS.TrucePlayer trucePlayer = KOS.INSTANCE.getTrucePlayer(identifier);
-			if(trucePlayer == null) {
-				event.reply("Couldn't find that player").setEphemeral(true).queue();
-				return;
+			if(identifier.equalsIgnoreCase("none")) {
+				for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.getTruceList()) {
+					if(trucePlayer.discordID == null || !trucePlayer.discordID.equals(targetMember.getId())) continue;
+					trucePlayer.discordID = null;
+					KOS.INSTANCE.save();
+					event.reply("Removed truce assignment from `" + targetMember.getEffectiveName() + "`").queue();
+					return;
+				}
+				event.reply(targetMember.getEffectiveName() + " is not associated to an account on the truce list").setEphemeral(true).queue();
+			} else {
+				KOS.TrucePlayer trucePlayer = KOS.INSTANCE.getTrucePlayer(identifier);
+				if(trucePlayer == null) {
+					event.reply("Couldn't find that player").setEphemeral(true).queue();
+					return;
+				}
+				trucePlayer.discordID = targetMember.getId();
+				KOS.INSTANCE.save();
+				event.reply("Assigned `" + identifier + "` to `" + targetMember.getEffectiveName() + "`").queue();
 			}
-
-			trucePlayer.discordID = targetMember.getId();
-			event.reply("Assigned " + identifier + " to " + targetMember.getEffectiveName()).queue();
 		}
 	}
 
@@ -210,7 +225,11 @@ public class TruceCommand extends DiscordCommand {
 				Command.Choice choice = new Command.Choice(trucePlayer.name, trucePlayer.name);
 				if(currentValue.isEmpty()) {
 					choices.add(choice);
-				} else if(trucePlayer.name.toLowerCase().startsWith(currentValue)) choices.add(choice);
+				} else{
+					for(String account : trucePlayer.name.toLowerCase().split("/")) {
+						if(account.startsWith(currentValue)) choices.add(choice);
+					}
+				}
 			}
 		}
 		if(currentOption.equals("category")) {

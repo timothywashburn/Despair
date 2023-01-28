@@ -74,7 +74,6 @@ public class KOS {
 		return false;
 	}
 
-	@Exclude
 	public List<TrucePlayer> getTruceList() {
 		Collections.sort(truceList);
 		return truceList;
