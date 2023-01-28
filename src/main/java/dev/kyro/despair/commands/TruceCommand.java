@@ -113,6 +113,11 @@ public class TruceCommand extends DiscordCommand {
 			}
 
 			String identifier = event.getOption("player").getAsString();
+			for(KOS.TrucePlayer trucePlayer : KOS.INSTANCE.getTruceList()) {
+				if(!trucePlayer.name.equalsIgnoreCase(identifier)) continue;
+				event.reply("That player is already on the truce list").setEphemeral(true).queue();
+				return;
+			}
 			KOS.TrucePlayer trucePlayer = new KOS.TrucePlayer(identifier, category, duration);
 
 			KOS.INSTANCE.addTrucePlayer(trucePlayer, true);

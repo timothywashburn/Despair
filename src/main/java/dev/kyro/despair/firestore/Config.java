@@ -30,6 +30,9 @@ public class Config {
 	public String KOS_DISPLAY_MESSAGE_ID = "0";
 	public String TRUCE_DISPLAY_CHANNEL_ID = "0";
 	public String TRUCE_DISPLAY_MESSAGE_ID = "0";
+	public String PURE_DISPLAY_CHANNEL_ID = "0";
+	public String PURE_DISPLAY_MESSAGE_ID = "0";
+	public String PURE_ALT_UUID = "";
 	public String TRIAL_ROLE_ID = "0";
 	public String MEMBER_ROLE_ID = "0";
 	public String ADMIN_ROLE_ID = "0";
@@ -69,6 +72,15 @@ public class Config {
 			case TRUCE_DISPLAY_MESSAGE_ID:
 				TRUCE_DISPLAY_MESSAGE_ID = value;
 				return;
+			case PURE_DISPLAY_CHANNEL_ID:
+				PURE_DISPLAY_CHANNEL_ID = value;
+				return;
+			case PURE_DISPLAY_MESSAGE_ID:
+				PURE_DISPLAY_MESSAGE_ID = value;
+				return;
+			case PURE_ALT_UUID:
+				PURE_ALT_UUID = value;
+				return;
 			case TRIAL_ROLE_ID:
 				TRIAL_ROLE_ID = value;
 				return;
@@ -99,12 +111,19 @@ public class Config {
 				TextChannel kosDisplay = DiscordManager.JDA.getTextChannelById(KOS_DISPLAY_CHANNEL_ID);
 				return kosDisplay != null ? kosDisplay.getName() : "Not Found";
 			case KOS_DISPLAY_MESSAGE_ID:
-				return KOS_DISPLAY_MESSAGE_ID + "";
+				return KOS_DISPLAY_MESSAGE_ID;
 			case TRUCE_DISPLAY_CHANNEL_ID:
 				TextChannel truceDisplay = DiscordManager.JDA.getTextChannelById(TRUCE_DISPLAY_CHANNEL_ID);
 				return truceDisplay != null ? truceDisplay.getName() : "Not Found";
 			case TRUCE_DISPLAY_MESSAGE_ID:
-				return TRUCE_DISPLAY_MESSAGE_ID + "";
+				return TRUCE_DISPLAY_MESSAGE_ID;
+			case PURE_DISPLAY_CHANNEL_ID:
+				TextChannel pureDisplay = DiscordManager.JDA.getTextChannelById(PURE_DISPLAY_CHANNEL_ID);
+				return pureDisplay != null ? pureDisplay.getName() : "Not Found";
+			case PURE_DISPLAY_MESSAGE_ID:
+				return PURE_DISPLAY_MESSAGE_ID;
+			case PURE_ALT_UUID:
+				return PURE_ALT_UUID;
 			case TRIAL_ROLE_ID:
 				Role trialRole = DiscordManager.JDA.getRoleById(TRIAL_ROLE_ID);
 				return trialRole != null ? trialRole.getName() : "Not Found";

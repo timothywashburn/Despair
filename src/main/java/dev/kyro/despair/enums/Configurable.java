@@ -13,8 +13,11 @@ public enum Configurable {
 	GUILD_ID("Server", ConfigType.SNOWFLAKE, true, "server"),
 	KOS_DISPLAY_CHANNEL_ID("KOS Display Channel", ConfigType.SNOWFLAKE, true, "kosdisplay"),
 	KOS_DISPLAY_MESSAGE_ID("KOS Display Message", ConfigType.SNOWFLAKE, true, "kosmessage"),
-	TRUCE_DISPLAY_CHANNEL_ID("Truce Display Message", ConfigType.SNOWFLAKE, true, "trucedisplay"),
+	TRUCE_DISPLAY_CHANNEL_ID("Truce Display Channel", ConfigType.SNOWFLAKE, true, "trucedisplay"),
 	TRUCE_DISPLAY_MESSAGE_ID("Truce Display Message", ConfigType.SNOWFLAKE, true, "trucemessage"),
+	PURE_DISPLAY_CHANNEL_ID("Pure Display Channel", ConfigType.SNOWFLAKE, true, "puredisplay"),
+	PURE_DISPLAY_MESSAGE_ID("Pure Account", ConfigType.SNOWFLAKE, true, "puremessage"),
+	PURE_ALT_UUID("Pure Display Message", ConfigType.STRING, false, "purealt"),
 	TRIAL_ROLE_ID("Trial Role", ConfigType.SNOWFLAKE, true, "trial"), // Same permissions as member just a second role
 	MEMBER_ROLE_ID("Member Role", ConfigType.SNOWFLAKE, false, "member"),
 	ADMIN_ROLE_ID("Admin Role", ConfigType.SNOWFLAKE, false, "admin");

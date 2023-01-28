@@ -53,6 +53,7 @@ public class DiscordManager extends Thread implements EventListener {
 		System.out.println("Discord bot enabled...");
 
 		new PlayerTracker().start();
+		new PureTracker().start();
 		new DisplayManager().start();
 
 		Role trialRole = DiscordManager.getMainGuild().getRoleById(Config.INSTANCE.TRIAL_ROLE_ID);
