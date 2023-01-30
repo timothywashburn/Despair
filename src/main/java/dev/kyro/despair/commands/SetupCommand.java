@@ -14,6 +14,9 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SetupCommand extends DiscordCommand {
 
 	public SetupCommand() {
@@ -38,23 +41,17 @@ public class SetupCommand extends DiscordCommand {
 
 		Role trialRole = guild.getRoleById(Config.INSTANCE.TRIAL_ROLE_ID);
 		Role memberRole = guild.getRoleById(Config.INSTANCE.MEMBER_ROLE_ID);
-		guild.createCategory("KOS").queue(category -> {
-			category.upsertPermissionOverride(guild.getPublicRole()).setDenied(Permission.VIEW_CHANNEL).queue(override1 -> {
-				if(trialRole != null) {
-					category.upsertPermissionOverride(trialRole).setAllowed(Permission.VIEW_CHANNEL).queue(override2 -> {
-						if(memberRole != null) {
-							category.upsertPermissionOverride(memberRole).setAllowed(Permission.VIEW_CHANNEL).queue(override3 ->
-									createChannels(guild, category));
-						} else createChannels(guild, category);
-					});
-				} else {
-					if(memberRole != null) {
-						category.upsertPermissionOverride(memberRole).setAllowed(Permission.VIEW_CHANNEL).queue(override3 ->
-								createChannels(guild, category));
-					} else createChannels(guild, category);
-				}
-			});
-		});
+		List<Role> roles = new ArrayList<>();
+		if(trialRole != null) roles.add(trialRole);
+		if(memberRole != null) roles.add(memberRole);
+
+		Category category = guild.createCategory("KOS").complete();
+		category.upsertPermissionOverride(guild.getPublicRole()).setDenied(Permission.VIEW_CHANNEL).complete();
+		for(Role role : roles) {
+			category.upsertPermissionOverride(role).setAllowed(Permission.VIEW_CHANNEL).complete();
+			category.upsertPermissionOverride(role).setDenied(Permission.MESSAGE_SEND).complete();
+		}
+		createChannels(guild, category);
 	}
 
 	public void createChannels(Guild guild, Category category) {
