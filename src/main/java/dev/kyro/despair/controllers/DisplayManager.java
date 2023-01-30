@@ -11,13 +11,14 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class DisplayManager extends Thread {
 
 	@Override
 	public void run() {
+		int count = 0;
 		while(true) {
-
 			Guild guild = DiscordManager.getMainGuild();
 			if(guild == null || KOS.INSTANCE.kosList.isEmpty()) {
 				sleepThread();
@@ -39,7 +40,19 @@ public class DisplayManager extends Thread {
 					message.editMessage(display).queue();
 				}, failure -> {});
 			}
+
+//			if(count % 6 == 0) {
+				TextChannel pureDisplayChannel = guild.getTextChannelById(Config.INSTANCE.PURE_DISPLAY_CHANNEL_ID);
+				if(pureDisplayChannel != null) {
+					String display = createPureMessage();
+					pureDisplayChannel.retrieveMessageById(Config.INSTANCE.PURE_DISPLAY_MESSAGE_ID).queue((message) -> {
+						message.editMessage(display).queue();
+					}, failure -> {});
+				}
+//			}
+
 			sleepThread();
+			count++;
 		}
 	}
 
@@ -111,6 +124,26 @@ public class DisplayManager extends Thread {
 			if(players.isEmpty()) continue;
 			display += "\n\n" + (category == null ? "INVALID CATEGORY" : category.toUpperCase()) + " (" + players.size() + ")";
 			for(KOS.TrucePlayer player : players) display += "\n> `" + player.name + "` - `" + player.getTruceStatus() + "`";
+		}
+
+		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");
+		display += "\n\n" + dateFormat.format(OffsetDateTime.now(Despair.TIME_ZONE)) + " EST";
+		return display;
+	}
+
+	public static String createPureMessage() {
+		String display = "DESPAIR PURE TRACKER ||@everyone||\n\n";
+
+		if(PureTracker.hypixelPlayer == null) {
+			display += "NO ACCOUNT FOUND";
+		} else {
+			display += "TRACKING PURE: `" + PureTracker.hypixelPlayer.name + "`";
+			if(PureTracker.lastUpdate + 60 * 60 * 1000 > System.currentTimeMillis()) {
+				for(Map.Entry<HypixelPlayer.PureType, Integer> entry : PureTracker.hypixelPlayer.pureMap.entrySet())
+					display += "\n> " + entry.getValue() + "x " + entry.getKey().displayName;
+			} else {
+				display += "\nno recent data";
+			}
 		}
 
 		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");

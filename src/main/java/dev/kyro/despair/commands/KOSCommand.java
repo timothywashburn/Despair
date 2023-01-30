@@ -7,6 +7,7 @@ import dev.kyro.despair.exceptions.LookedUpNameRecentlyException;
 import dev.kyro.despair.exceptions.NoAPIKeyException;
 import dev.kyro.despair.firestore.KOS;
 import dev.kyro.despair.firestore.Users;
+import dev.kyro.despair.controllers.HypixelPlayer;
 import dev.kyro.despair.misc.Misc;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;

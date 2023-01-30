@@ -42,7 +42,7 @@ public class PlayerTracker extends Thread {
 //					System.out.println("Finished iteration in " + format.format((now.getTime() - lastIteration) / 1000D) + "s");
 					lastIteration = now.getTime();
 				}
-				sleepThread(playersExtra * 500L);
+				sleepThread(playersExtra * 510L);
 			}
 
 			KOS.KOSPlayer kosPlayer = playerIteration.get(count);
@@ -130,13 +130,7 @@ public class PlayerTracker extends Thread {
 	}
 
 	public void sleepThread() {
-		int dir = 500;
-		try {
-			Thread.sleep(dir);
-		} catch(InterruptedException e) {
-			e.printStackTrace();
-			System.out.println("Failed to sleep: " + System.currentTimeMillis());
-		}
+		sleepThread(510);
 	}
 
 	public void sleepThread(long dir) {

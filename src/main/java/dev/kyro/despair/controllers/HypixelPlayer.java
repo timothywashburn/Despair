@@ -1,12 +1,13 @@
 package dev.kyro.despair.controllers;
 
+import me.nullicorn.nedit.NBTReader;
+import me.nullicorn.nedit.type.NBTList;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class HypixelPlayer {
 	private JSONObject playerObj;
@@ -24,24 +25,36 @@ public class HypixelPlayer {
 	public List<Integer> recentKills = new ArrayList<>();
 	public List<Integer> apiDisabledKillTracker = new ArrayList<>();
 
-	public HypixelPlayer(UUID UUID) {
+	public Map<PureType, Integer> pureMap = new LinkedHashMap<>();
 
+	public HypixelPlayer(UUID UUID) {
 		this.UUID = UUID;
+		init();
 	}
 
 	public HypixelPlayer(JSONObject playerObj) {
-
 		update(playerObj);
+		init();
+	}
+
+	public void init() {
+		for(PureType pureType : PureType.values()) pureMap.put(pureType, 0);
 	}
 
 	public void update(JSONObject playerObj) {
-
 		this.playerObj = playerObj.getJSONObject("player");
 		getStats();
 	}
 
-	public void getStats() {
+	public void loadPureMap() {
+		JSONObject pitData = playerObj.getJSONObject("stats").getJSONObject("Pit").getJSONObject("profile");
+		loadDataSection(pitData, "inv_contents");
+		loadDataSection(pitData, "inv_enderchest");
+		loadDataSection(pitData, "inv_armor");
+		loadDataSection(pitData, "item_stash");
+	}
 
+	public void getStats() {
 		JSONObject achievements = playerObj.getJSONObject("achievements");
 		JSONObject pitData = playerObj.getJSONObject("stats").getJSONObject("Pit").getJSONObject("profile");
 
@@ -72,6 +85,35 @@ public class HypixelPlayer {
 		apiDisabledKillTracker.add(kills);
 		if(apiDisabledKillTracker.size() > Math.round(600.0 / PlayerTracker.getMaxPlayers() + 1))
 			apiDisabledKillTracker.remove(0);
+	}
+
+	public void loadDataSection(JSONObject pitData, String section) {
+		if(!pitData.has(section)) return;
+		try {
+			JSONArray encodedInv = pitData.getJSONObject(section).getJSONArray("data");
+			String[] stringArrInInv = encodedInv.toString().replaceAll("\\[", "").replaceAll("]", "").split(",");
+			byte[] byteArrInv = new byte[stringArrInInv.length];
+			for(int j = 0; j < stringArrInInv.length; j++) {
+				String string = stringArrInInv[j];
+				byteArrInv[j] = Byte.parseByte(string);
+			}
+			NBTList nbtListInv = NBTReader.read(new ByteArrayInputStream(byteArrInv)).getList("i");
+			final int[] j = {-1};
+			nbtListInv.forEachCompound(compound -> {
+				j[0]++;
+				if(compound.isEmpty()) return;
+
+				try {
+					int id = compound.getInt("id", -1);
+					int count = compound.getInt("Count", -1);
+					String name = compound.getCompound("tag").getCompound("display").getString("Name", "");
+					PureType pureType = getPureType(id, name);
+					if(pureType == null) return;
+					pureMap.putIfAbsent(pureType, 0);
+					pureMap.put(pureType, pureMap.get(pureType) + count);
+				} catch(Exception ignored) {}
+			});
+		} catch(Exception ignored) {}
 	}
 
 	public JSONObject getPlayerObj() {
@@ -111,5 +153,29 @@ public class HypixelPlayer {
 								"(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)", "$1-$2-$3-$4-$5"
 						)
 		);
+	}
+
+	public enum PureType {
+		PHILO("Philosopher's Cactus"),
+		FEATHER("Funky Feather"),
+		VILE("Chunk of Vile"),
+		PB("Pants Bundle"),
+		GEM("Totally Legit Gem");
+
+		public String displayName;
+
+		PureType(String displayName) {
+			this.displayName = displayName;
+		}
+	}
+
+	public static PureType getPureType(int id, String name) {
+		name = name.toLowerCase();
+		if(id == 81 && name.contains("philosopher")) return PureType.PHILO;
+		if(id == 288 && name.contains("funky")) return PureType.FEATHER;
+		if(id == 263 && name.contains("vile")) return PureType.VILE;
+		if(id == 342 && name.contains("pants bundle")) return PureType.PB;
+		if(id == 388 && name.contains("gem")) return PureType.GEM;
+		return null;
 	}
 }

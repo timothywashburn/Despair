@@ -55,7 +55,7 @@ public class SetupCommand extends DiscordCommand {
 	}
 
 	public void createChannels(Guild guild, Category category) {
-		guild.createTextChannel("kos-list", category).queue(displayChannel -> {
+		guild.createTextChannel("kos-info", category).queue(displayChannel -> {
 			Config.INSTANCE.set(Configurable.KOS_DISPLAY_CHANNEL_ID, displayChannel.getId());
 			displayChannel.sendMessage(DisplayManager.createKOSMessage().replace(" ||@everyone||", "")).queue(displayMessage -> {
 				Config.INSTANCE.set(Configurable.KOS_DISPLAY_MESSAGE_ID, displayMessage.getId());
@@ -63,12 +63,20 @@ public class SetupCommand extends DiscordCommand {
 				displayMessage.createThreadChannel("Notifications").queue();
 			});
 		});
-		guild.createTextChannel("truce-list", category).queue(displayChannel -> {
+		guild.createTextChannel("truce-info", category).queue(displayChannel -> {
 			Config.INSTANCE.set(Configurable.TRUCE_DISPLAY_CHANNEL_ID, displayChannel.getId());
 			displayChannel.sendMessage(DisplayManager.createTruceMessage().replace(" ||@everyone||", "")).queue(displayMessage -> {
 				Config.INSTANCE.set(Configurable.TRUCE_DISPLAY_MESSAGE_ID, displayMessage.getId());
 				Config.INSTANCE.save();
-				displayMessage.createThreadChannel("Notifications").queue();
+//				displayMessage.createThreadChannel("Notifications").queue();
+			});
+		});
+		guild.createTextChannel("group-pure", category).queue(displayChannel -> {
+			Config.INSTANCE.set(Configurable.PURE_DISPLAY_CHANNEL_ID, displayChannel.getId());
+			displayChannel.sendMessage(DisplayManager.createPureMessage().replace(" ||@everyone||", "")).queue(displayMessage -> {
+				Config.INSTANCE.set(Configurable.PURE_DISPLAY_MESSAGE_ID, displayMessage.getId());
+				Config.INSTANCE.save();
+//				displayMessage.createThreadChannel("Notifications").queue();
 			});
 		});
 	}
