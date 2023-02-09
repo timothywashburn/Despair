@@ -28,14 +28,16 @@ public class PureTracker extends Thread {
 				} else if(exception instanceof InvalidAPIKeyException) {
 					System.out.println("[Pure Tracker] Invalid api key");
 				}
-				return;
+				sleepThread();
+				continue;
 			}
 			try {
 				hypixelPlayer = new HypixelPlayer(requestData);
 				lastUpdate = System.currentTimeMillis();
 			} catch(Exception ignored) {
 				System.out.println("[Pure Tracker] Invalid player");
-				return;
+				sleepThread();
+				continue;
 			}
 
 			hypixelPlayer.loadPureMap();
