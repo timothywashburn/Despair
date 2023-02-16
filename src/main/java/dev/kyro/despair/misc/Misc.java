@@ -35,20 +35,20 @@ public class Misc {
 		Matcher matcher = periodPattern.matcher(durationString);
 		Duration duration = Duration.ZERO;
 		while(matcher.find()) {
-			int num = Integer.parseInt(matcher.group(1));
-			String typ = matcher.group(2);
-			switch(typ) {
+			int number = Integer.parseInt(matcher.group(1));
+			String timeUnit = matcher.group(2);
+			switch(timeUnit) {
 				case "m":
-					duration = duration.plus(Duration.ofMinutes(num));
+					duration = duration.plus(Duration.ofMinutes(number));
 					break;
 				case "h":
-					duration = duration.plus(Duration.ofHours(num));
+					duration = duration.plus(Duration.ofHours(number));
 					break;
 				case "d":
-					duration = duration.plus(Duration.ofDays(num));
+					duration = duration.plus(Duration.ofDays(number));
 					break;
 				case "w":
-					duration = duration.plus(Duration.ofDays(num).multipliedBy(7));
+					duration = duration.plus(Duration.ofDays(number).multipliedBy(7));
 			}
 		}
 		if(duration.equals(Duration.ZERO)) throw new Exception();
