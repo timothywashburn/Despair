@@ -75,7 +75,6 @@ public class DiscordManager extends Thread implements EventListener {
 		registerCommand(new HelpCommand());
 		registerCommand(new PingCommand());
 		registerCommand(new KOSCommand());
-		registerCommand(new KOSCommand());
 		registerCommand(new TruceCommand());
 		registerCommand(new ConfigCommand());
 		registerCommand(new SetupCommand());
