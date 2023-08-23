@@ -3,19 +3,18 @@ package dev.kyro.despair.controllers;
 import dev.kyro.despair.exceptions.InvalidAPIKeyException;
 import dev.kyro.despair.exceptions.LookedUpNameRecentlyException;
 import dev.kyro.despair.exceptions.NoAPIKeyException;
+import dev.kyro.despair.firestore.Config;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
-import org.omg.CORBA.DynAnyPackage.Invalid;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.MissingResourceException;
 import java.util.UUID;
 
 public class HypixelAPIManager {
@@ -23,8 +22,8 @@ public class HypixelAPIManager {
 	public static JSONObject request(String name) throws Exception {
 
 		HttpClient client = new DefaultHttpClient();
-		if(APIKeys.getAPIKey() == null) throw new NoAPIKeyException();
-		HttpGet request = new HttpGet("https://api.hypixel.net/player?name=" + name + "&key=" + APIKeys.getAPIKey());
+		if(Config.INSTANCE.API_KEY == null || Config.INSTANCE.API_KEY.isEmpty()) throw new NoAPIKeyException();
+		HttpGet request = new HttpGet("https://api.hypixel.net/player?name=" + name + "&key=" + Config.INSTANCE.API_KEY);
 		HttpResponse response;
 		String result;
 
@@ -52,8 +51,8 @@ public class HypixelAPIManager {
 	public static JSONObject request(UUID uuid) throws Exception {
 
 		HttpClient client = new DefaultHttpClient();
-		if(APIKeys.getAPIKey() == null) throw new NoAPIKeyException();
-		HttpGet request = new HttpGet("https://api.hypixel.net/player?uuid=" + uuid + "&key=" + APIKeys.getAPIKey());
+		if(Config.INSTANCE.API_KEY == null || Config.INSTANCE.API_KEY.isEmpty()) throw new NoAPIKeyException();
+		HttpGet request = new HttpGet("https://api.hypixel.net/player?uuid=" + uuid + "&key=" + Config.INSTANCE.API_KEY);
 		HttpResponse response;
 		String result;
 

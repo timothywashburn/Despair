@@ -5,7 +5,6 @@ import com.google.cloud.firestore.Firestore;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
-import dev.kyro.despair.controllers.APIKeys;
 import dev.kyro.despair.controllers.DiscordManager;
 import dev.kyro.despair.firestore.Config;
 import dev.kyro.despair.firestore.KOS;
@@ -69,9 +68,6 @@ public class Despair {
 		} catch(InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
-
-		APIKeys.init();
-		APIKeys.updateAPIKeys();
 
 		new DiscordManager().start();
 	}
