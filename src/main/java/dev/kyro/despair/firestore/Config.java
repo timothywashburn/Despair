@@ -158,7 +158,7 @@ public class Config {
 			}).start();
 		}
 		if(!saveQueued && !onSaveCooldown) {
-			Despair.FIRESTORE.collection(Variables.COLLECTION).document("config").set(this);
+			Despair.FIRESTORE.collection(Variables.FIRESTORE_COLLECTION).document("config").set(this);
 			onSaveCooldown = true;
 			new Thread(() -> {
 				try {

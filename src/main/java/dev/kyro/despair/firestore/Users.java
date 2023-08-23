@@ -101,7 +101,7 @@ public class Users {
 			}).start();
 		}
 		if(!saveQueued && !onSaveCooldown) {
-			Despair.FIRESTORE.collection(Variables.COLLECTION).document("users").set(this);
+			Despair.FIRESTORE.collection(Variables.FIRESTORE_COLLECTION).document("users").set(this);
 			onSaveCooldown = true;
 			new Thread(() -> {
 				try {

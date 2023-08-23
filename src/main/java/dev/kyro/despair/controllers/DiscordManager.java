@@ -38,7 +38,7 @@ public class DiscordManager extends Thread implements EventListener {
 	@Override
 	public void run() {
 
-		BUILDER = JDABuilder.createDefault(Variables.TOKEN);
+		BUILDER = JDABuilder.createDefault(Variables.DISCORD_BOT_TOKEN);
 		WAITER = new EventWaiter();
 		try {
 			BUILDER.setMemberCachePolicy(MemberCachePolicy.ALL);

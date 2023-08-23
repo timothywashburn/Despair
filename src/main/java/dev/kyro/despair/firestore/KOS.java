@@ -123,7 +123,7 @@ public class KOS {
 			}).start();
 		}
 		if(!saveQueued && !onSaveCooldown) {
-			Despair.FIRESTORE.collection(Variables.COLLECTION).document("kos").set(this);
+			Despair.FIRESTORE.collection(Variables.FIRESTORE_COLLECTION).document("kos").set(this);
 			onSaveCooldown = true;
 			new Thread(() -> {
 				try {

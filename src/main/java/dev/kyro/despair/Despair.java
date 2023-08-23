@@ -50,22 +50,22 @@ public class Despair {
 		}
 
 		try {
-			if(!FIRESTORE.collection(Variables.COLLECTION).document("kos").get().get().exists()) {
+			if(!FIRESTORE.collection(Variables.FIRESTORE_COLLECTION).document("kos").get().get().exists()) {
 				KOS = new KOS();
 				KOS.save();
 			}
-			if(!FIRESTORE.collection(Variables.COLLECTION).document("users").get().get().exists()) {
+			if(!FIRESTORE.collection(Variables.FIRESTORE_COLLECTION).document("users").get().get().exists()) {
 				USERS = new Users();
 				USERS.save();
 			}
-			if(!FIRESTORE.collection(Variables.COLLECTION).document("config").get().get().exists()) {
+			if(!FIRESTORE.collection(Variables.FIRESTORE_COLLECTION).document("config").get().get().exists()) {
 				CONFIG = new Config();
 				CONFIG.save();
 			}
 
-			KOS = FIRESTORE.collection(Variables.COLLECTION).document("kos").get().get().toObject(KOS.class);
-			USERS = FIRESTORE.collection(Variables.COLLECTION).document("users").get().get().toObject(Users.class);
-			CONFIG = FIRESTORE.collection(Variables.COLLECTION).document("config").get().get().toObject(Config.class);
+			KOS = FIRESTORE.collection(Variables.FIRESTORE_COLLECTION).document("kos").get().get().toObject(KOS.class);
+			USERS = FIRESTORE.collection(Variables.FIRESTORE_COLLECTION).document("users").get().get().toObject(Users.class);
+			CONFIG = FIRESTORE.collection(Variables.FIRESTORE_COLLECTION).document("config").get().get().toObject(Config.class);
 		} catch(InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
